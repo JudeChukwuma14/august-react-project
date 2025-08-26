@@ -109,17 +109,35 @@ const Signup = () => {
             )}
           </div>
 
-          <button className="w-full px-5 py-3 mt-4 text-white rounded-md bg-[#36d7b7] text-lg font-bold hover:bg-[#2ebfa1] flex justify-center items-center" disabled={isLoading}>
-          {isLoading ? <div className=" w-6 h-6 border-b-2 border-white rounded-full animate-spin"></div> : "Sign Up"}
+          <button
+            className="w-full px-5 py-3 mt-4 text-white rounded-md bg-[#36d7b7] text-lg font-bold hover:bg-[#2ebfa1] flex justify-center items-center"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <div className="w-6 h-6 border-b-2 border-white rounded-full animate-spin"></div>
+            ) : (
+              "Sign Up"
+            )}
           </button>
         </form>
 
-        <p className="mt-3 text-sm text-center text-gray-500">
-          Already have an account?{" "}
-          <Link to="/login" className=" text-[#36d7b7] hover:underline">
-            Login
-          </Link>
-        </p>
+        <div className="flex items-center justify-center gap-4">
+          <p className="mt-3 text-sm text-center text-gray-500">
+            Already have an account?{" "}
+            <Link to="/login" className=" text-[#36d7b7] hover:underline">
+              Login
+            </Link>
+          </p>
+          <p className="mt-3 text-sm text-gray-500">
+            Become a seller?{" "}
+            <Link
+              to="/seller-signup"
+              className=" text-[#36d7b7] hover:underline"
+            >
+              Signup
+            </Link>
+          </p>
+        </div>
       </div>
     </section>
   );

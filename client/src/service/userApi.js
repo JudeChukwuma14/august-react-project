@@ -17,3 +17,31 @@ export const createUser = async (userData)=>{
         throw error;
     }
 }
+
+export const LoginUser = async(userData)=>{
+    try {
+        const response = await api.post("/login", userData)
+        return response.data
+    } catch (error) {
+        console.error(error.message)
+    }
+}
+
+export const createrSeller = async(sellerData)=>{
+     try {
+        const response = await api.post("/seller-signup", sellerData);
+        return response.data;
+    } catch (error) {
+        console.error("Error creating user:", error.message);
+        throw error;
+    } 
+}
+
+export const sellerLogin = async(sellerData)=>{
+    try {
+        const response = await api.post("/seller-login", sellerData)
+        return response.data
+    } catch (error) {
+        console.error(error.message)
+    }
+}

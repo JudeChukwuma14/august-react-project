@@ -1,9 +1,34 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import { Sliding } from "../common/Sliding";
 import { FaEyeSlash, FaEye } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { LoginUser } from "../../service/userApi";
+import { toast } from "react-toastify";
 const Signin = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    try {
+      const response = await LoginUser(data);
+      console.log("User created successfully:", response);
+      toast.success(response.message || "Login successfully");
+      navigate("/");
+    } catch (error) {
+      toast.error(error.message);
+      console.error("Signup error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <section className="flex flex-col w-full h-screen lg:pl-[500px] items-center justify-center">
       <Sliding />
@@ -12,7 +37,7 @@ const Signin = () => {
         <h1 className="mb-6 text-xl font-bold text-center sm:text-2xl sm:mb-8">
           User Sign-In
         </h1>
-        <form className="flex flex-col gap-4">
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <label
               htmlFor="email"
@@ -22,8 +47,16 @@ const Signin = () => {
             </label>
             <input
               type="email"
-              className={` w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#36d7b7]`}
+              className={` w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#36d7b7]  ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              }`}
+              {...register("email", { required: "Email is required" })}
             />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.email.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -36,7 +69,10 @@ const Signin = () => {
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                className={` w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#36d7b7]`}
+                className={` w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#36d7b7] ${
+                  errors.password ? "border-red-500" : "border-gray-300"
+                }`}
+                {...register("password", { required: "Password is required" })}
               />
               <span
                 className="absolute text-gray-500 transform cursor-pointer right-5 top-4"
@@ -45,19 +81,42 @@ const Signin = () => {
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </span>
             </div>
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.password.message}
+              </p>
+            )}
           </div>
 
-          <button className="w-full px-5 py-3 mt-4 text-white rounded-md bg-[#36d7b7] text-lg font-bold hover:bg-[#2ebfa1]">
-            Login
+          <button
+            className="w-full px-5 py-3 mt-4 text-white rounded-md bg-[#36d7b7] text-lg font-bold hover:bg-[#2ebfa1] flex justify-center items-center"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <div className="w-6 h-6 border-b-2 border-white rounded-full animate-spin"></div>
+            ) : (
+              "Sign In"
+            )}
           </button>
         </form>
 
-        <p className="mt-3 text-sm text-center text-gray-500">
-          Don't have an account?{" "}
-          <Link to="/signup" className=" text-[#36d7b7] hover:underline">
-            Signup
-          </Link>
-        </p>
+        <div className="flex items-center justify-center gap-4">
+          <p className="mt-3 text-sm text-center text-gray-500">
+            don't have an account?{" "}
+            <Link to="/signup" className=" text-[#36d7b7] hover:underline">
+              Signup
+            </Link>
+          </p>
+          <p className="mt-3 text-sm text-gray-500">
+            Become a seller?{" "}
+            <Link
+              to="/seller-signup"
+              className=" text-[#36d7b7] hover:underline"
+            >
+              Signup
+            </Link>
+          </p>
+        </div>
       </div>
     </section>
   );
