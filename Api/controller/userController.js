@@ -110,6 +110,8 @@ const loginSeller = async (req, res) => {
             .json({ message: "Internal Server Error", error: error.message });
     }
 };
+
+
 module.exports = {
     signUp,
     login,
