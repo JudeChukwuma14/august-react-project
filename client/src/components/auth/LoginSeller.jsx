@@ -21,7 +21,7 @@ const LoginSeller = () => {
       const response = await sellerLogin(data);
       console.log("User created successfully:", response);
       toast.success(response.message || "Login successfully");
-      navigate("/");
+      navigate("/seller");
     } catch (error) {
       toast.error(error.message);
       console.error("Signup error:", error);
