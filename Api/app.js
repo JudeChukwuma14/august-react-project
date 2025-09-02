@@ -4,7 +4,7 @@ require("dotenv").config()
 const mongoose = require("mongoose")
 const allRouter = require("./router/userRouter")
 const cors = require("cors")
-mongoose.connect("mongodb://127.0.0.1:27017/mydatabase").then(() => {
+mongoose.connect("mongodb://127.0.0.1:27017/unknown").then(() => {
     console.log("Connected to MongoDB")
 }).catch((err) => {
     console.error("Failed to connect to MongoDB", err.message)

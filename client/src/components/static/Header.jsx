@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { FaSearch, FaShoppingBag } from "react-icons/fa";
 import { MdMenu } from "react-icons/md";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const user = useSelector((state) => state.user?.user || null);
+  console.log(user.username);
+  const firstLetter = user.username.charAt(0).toUpperCase();
+  console.log("...", firstLetter);
   return (
     <header className="flex items-center justify-between w-full h-20 px-5 shadow-lg md:px-14">
       <div className="text-xl font-semibold">LOGO</div>
@@ -38,12 +42,18 @@ const Header = () => {
           <FaSearch size={20} className="cursor-pointer" />
           <FaShoppingBag size={20} className="cursor-pointer" />
         </div>
-        <Link
-          to="/selectpath"
-          className="px-4 py-2 bg-[#36d7b7] text-white rounded-md text-xs hidden md:block"
-        >
-          Get Started
-        </Link>
+        {firstLetter ? (
+          <h1 className=" cursor-pointer font-bold text-lg bg-[#36d7b7] text-white rounded-full h-[30px] w-[30px] flex justify-center items-center ring-4">
+            {firstLetter}
+          </h1>
+        ) : (
+          <Link
+            to="/selectpath"
+            className="px-4 py-2 bg-[#36d7b7] text-white rounded-md text-xs hidden md:block"
+          >
+            Get Started
+          </Link>
+        )}
         <MdMenu
           size={25}
           className="block cursor-pointer md:hidden"
@@ -56,7 +66,9 @@ const Header = () => {
       {isMenuOpen && (
         <div
           className={`absolute left-0 w-full bg-white shadow-lg top-20 md:hidden transition-all duration-300 ease-in-out ${
-            isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-10 pointer-events-none"
+            isMenuOpen
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 -translate-y-10 pointer-events-none"
           }`}
         >
           <ul className="flex flex-col items-center gap-3 p-4">

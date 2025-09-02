@@ -11,6 +11,7 @@ export const api = axios.create({
 export const createUser = async (userData)=>{
     try {
         const response = await api.post("/signup", userData);
+        console.log(response)
         return response.data;
     } catch (error) {
         console.error("Error creating user:", error.message);

@@ -5,10 +5,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { LoginUser } from "../../service/userApi";
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { setUserLogin } from "../../redux/slices/userSlices";
 const Signin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
@@ -20,6 +23,7 @@ const Signin = () => {
     try {
       const response = await LoginUser(data);
       console.log("User created successfully:", response);
+      dispatch(setUserLogin({ user: response.data, token: response.token }));
       toast.success(response.message || "Login successfully");
       navigate("/");
     } catch (error) {

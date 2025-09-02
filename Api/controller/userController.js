@@ -2,7 +2,8 @@ const User = require("../models/userModel");
 const Seller = require("../models/sellerModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const Product = require("../models/productModel")
+const Product = require("../models/productModel");
+
 const signUp = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -44,10 +45,19 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT);
+    const data = {
+      username: user.username,
+      email: user.email,
+      password: user.password,
+    }
     res
       .cookie("AUGUSTREACT", token, { expiresIn: "1hr" })
       .status(200)
-      .json({ data: req.body, token: token, message: "Login successfull" });
+      .json({
+        data,
+        token: token,
+        message: "Login successfull",
+      });
   } catch (error) {
     res
       .status(500)
@@ -139,14 +149,16 @@ const postProduct = async (req, res) => {
     }
 
     const product = await Product.create({
-        title,
-        description,
-        price,
-        category,
-        images:images,
-        seller: req.user._id
-    })
-    return res.status(201).json({message:"Product Uploaded successfully", product})
+      title,
+      description,
+      price,
+      category,
+      images: images,
+      seller: req.user._id,
+    });
+    return res
+      .status(201)
+      .json({ message: "Product Uploaded successfully", product });
   } catch (error) {
     res
       .status(500)
@@ -158,5 +170,5 @@ module.exports = {
   login,
   signupSeller,
   loginSeller,
-  postProduct
+  postProduct,
 };

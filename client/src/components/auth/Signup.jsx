@@ -24,7 +24,7 @@ const Signup = () => {
       navigate("/login");
     } catch (error) {
       toast.error(error.message);
-      console.error("Signup error:", error);
+      console.error("Signup error:", error.message);
     } finally {
       setIsLoading(false);
     }

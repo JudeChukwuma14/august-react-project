@@ -44,7 +44,7 @@ export const Siderbar = ({ sidebarOpen, setSidebarOpen }) => {
       >
         <div className="flex-1">
           <div className="flex items-center justify-center h-16 border-b border-gray-200">
-            <h1 className="text-xl font-bold text-[#2196F3]">LOGO</h1>
+            <h1 className="text-xl font-bold">LOGO</h1>
           </div>
 
           <nav className="px-2 mt-5">
