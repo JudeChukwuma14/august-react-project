@@ -9,6 +9,8 @@ const Home = lazy(() => import("../pages/Home"));
 const About = lazy(() => import("../pages/About"));
 const Contact = lazy(() => import("../pages/Contact"));
 const Shop = lazy(() => import("../pages/Shop"));
+const ProductDetails = lazy(() => import("../pages/ProductDetails"));
+const Checkout = lazy(() => import("../pages/Checkout"));
 const Signup = lazy(() => import("../components/auth/Signup"));
 const Login = lazy(() => import("../components/auth/Signin"));
 const SignupSeller = lazy(() => import("../components/auth/SignupSeller"));
@@ -16,7 +18,7 @@ const LoginSeller = lazy(() => import("../components/auth/LoginSeller"));
 const Selectpath = lazy(() => import("../components/auth/Selectpath"));
 
 // seller pages
-const Dashboard = lazy(()=>import("../Seller/pages/Dashboard"))
+const Dashboard = lazy(() => import("../Seller/pages/Dashboard"));
 const Product = lazy(() => import("../Seller/pages/Product"));
 const withSuspense = (Component) => (
   <Suspense fallback={<Spinner />}>
@@ -42,8 +44,16 @@ const rotuerConfig = [
         element: withSuspense(Contact),
       },
       {
+        path: "checkout",
+        element: withSuspense(Checkout),
+      },
+      {
         path: "shop",
         element: withSuspense(Shop),
+      },
+      {
+        path: "product/:id",
+        element: withSuspense(ProductDetails),
       },
     ],
   },
@@ -51,11 +61,11 @@ const rotuerConfig = [
     path: "/seller",
     element: <SellerLayout />,
     children: [
-     {
-      index: true,
-      element: withSuspense(Dashboard)
-     },
-     {
+      {
+        index: true,
+        element: withSuspense(Dashboard),
+      },
+      {
         path: "post-product",
         element: withSuspense(Product),
       },

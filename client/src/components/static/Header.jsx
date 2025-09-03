@@ -7,14 +7,12 @@ import { Link } from "react-router-dom";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const user = useSelector((state) => state.user?.user || null);
-  console.log(user.username);
   const firstLetter = user.username.charAt(0).toUpperCase();
-  console.log("...", firstLetter);
   return (
     <header className="flex items-center justify-between w-full h-20 px-5 shadow-lg md:px-14">
-      <div className="text-xl font-semibold">LOGO</div>
+      <div className="text-xl font-semibold">FashionHub</div>
       <nav className="hidden md:block" role="navigation">
-        <ul className="flex gap-3">
+        <ul className="flex gap-8">
           <li className="font-semibold">
             <Link to="/" className="hover:text-[#36d7b7]">
               Home
