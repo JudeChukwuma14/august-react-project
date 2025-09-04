@@ -1,13 +1,23 @@
 import React, { useState } from "react";
 import { FaSearch, FaShoppingBag } from "react-icons/fa";
 import { MdMenu } from "react-icons/md";
-import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { setUserLogout } from "../../redux/slices/userSlices";
+import { IoMdLogOut } from "react-icons/io";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const user = useSelector((state) => state.user?.user || null);
-  const firstLetter = user.username.charAt(0).toUpperCase();
+  const firstLetter = user?.username ? user.username.charAt(0).toUpperCase() : null;
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogoutUser = () => {
+    dispatch(setUserLogout());
+    navigate("/selectpath");
+  };
+
   return (
     <header className="flex items-center justify-between w-full h-20 px-5 shadow-lg md:px-14">
       <div className="text-xl font-semibold">FashionHub</div>
@@ -40,10 +50,13 @@ const Header = () => {
           <FaSearch size={20} className="cursor-pointer" />
           <FaShoppingBag size={20} className="cursor-pointer" />
         </div>
-        {firstLetter ? (
-          <h1 className=" cursor-pointer font-bold text-lg bg-[#36d7b7] text-white rounded-full h-[30px] w-[30px] flex justify-center items-center ring-4">
-            {firstLetter}
-          </h1>
+        {user ? (
+          <div className="flex items-center gap-3">
+            <h1 className="cursor-pointer font-bold text-lg bg-[#36d7b7] text-white rounded-full h-[30px] w-[30px] flex justify-center items-center ring-4">
+              {firstLetter}
+            </h1>
+            <IoMdLogOut onClick={handleLogoutUser} className="cursor-pointer" />
+          </div>
         ) : (
           <Link
             to="/selectpath"
@@ -63,58 +76,55 @@ const Header = () => {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div
-          className={`absolute left-0 w-full bg-white shadow-lg top-20 md:hidden transition-all duration-300 ease-in-out ${
-            isMenuOpen
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 -translate-y-10 pointer-events-none"
+          className={`absolute left-0 w-full bg-white shadow-lg top-20 z-50 md:hidden transition-all duration-300 ease-in-out ${
+            isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-10 pointer-events-none"
           }`}
         >
           <ul className="flex flex-col items-center gap-3 p-4">
             <li className="font-semibold">
-              <Link
-                to="/"
-                className="hover:text-[#36d7b7]"
-                onClick={() => setIsMenuOpen(false)}
-              >
+              <Link to="/" className="hover:text-[#36d7b7]" onClick={() => setIsMenuOpen(false)}>
                 Home
               </Link>
             </li>
             <li className="font-semibold">
-              <Link
-                to="/shop"
-                className="hover:text-[#36d7b7]"
-                onClick={() => setIsMenuOpen(false)}
-              >
+              <Link to="/shop" className="hover:text-[#36d7b7]" onClick={() => setIsMenuOpen(false)}>
                 Shop
               </Link>
             </li>
             <li className="font-semibold">
-              <Link
-                to="/about"
-                className="hover:text-[#36d7b7]"
-                onClick={() => setIsMenuOpen(false)}
-              >
+              <Link to="/about" className="hover:text-[#36d7b7]" onClick={() => setIsMenuOpen(false)}>
                 About
               </Link>
             </li>
             <li className="font-semibold">
-              <Link
-                to="/contact"
-                className="hover:text-[#36d7b7]"
-                onClick={() => setIsMenuOpen(false)}
-              >
+              <Link to="/contact" className="hover:text-[#36d7b7]" onClick={() => setIsMenuOpen(false)}>
                 Contact
               </Link>
             </li>
-            <li>
-              <Link
-                to="/selectpath"
-                className="px-4 py-2 bg-[#36d7b7] text-white rounded-md text-xs"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Get Started
-              </Link>
-            </li>
+            {!user && (
+              <li>
+                <Link
+                  to="/selectpath"
+                  className="px-4 py-2 bg-[#36d7b7] text-white rounded-md text-xs"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Get Started
+                </Link>
+              </li>
+            )}
+            {user && (
+              <li>
+                <button
+                  onClick={() => {
+                    handleLogoutUser();
+                    setIsMenuOpen(false);
+                  }}
+                  className="px-4 py-2 bg-[#36d7b7] text-white rounded-md text-xs"
+                >
+                  Logout
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       )}
