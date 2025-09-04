@@ -5,10 +5,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { LoginUser, sellerLogin } from "../../service/userApi";
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { setSellerLogin } from "../../redux/slices/sellerSlices";
 const LoginSeller = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
@@ -20,6 +23,9 @@ const LoginSeller = () => {
     try {
       const response = await sellerLogin(data);
       console.log("User created successfully:", response);
+      dispatch(
+        setSellerLogin({ seller: response.data, token: response.token })
+      );
       toast.success(response.message || "Login successfully");
       navigate("/seller");
     } catch (error) {

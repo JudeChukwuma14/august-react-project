@@ -19,7 +19,7 @@ const Selectpath = lazy(() => import("../components/auth/Selectpath"));
 
 // seller pages
 const Dashboard = lazy(() => import("../Seller/pages/Dashboard"));
-const Product = lazy(() => import("../Seller/pages/Product"));
+const ProductFrom = lazy(() => import("../Seller/pages/ProductForm"));
 const withSuspense = (Component) => (
   <Suspense fallback={<Spinner />}>
     <Component />
@@ -67,7 +67,7 @@ const rotuerConfig = [
       },
       {
         path: "post-product",
-        element: withSuspense(Product),
+        element: withSuspense(ProductFrom),
       },
     ],
   },

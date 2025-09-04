@@ -46,3 +46,4 @@ export const sellerLogin = async(sellerData)=>{
         console.error(error.message)
     }
 }
+

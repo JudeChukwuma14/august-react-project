@@ -49,7 +49,7 @@ export const Siderbar = ({ sidebarOpen, setSidebarOpen }) => {
 
           <nav className="px-2 mt-5">
             <Link
-              to="/"
+              to="/seller"
               className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${
                 location.pathname === "/"
                   ? "bg-[#87CEEB] text-white"
@@ -65,7 +65,7 @@ export const Siderbar = ({ sidebarOpen, setSidebarOpen }) => {
               <button
                 onClick={() => setProductsOpen(!productsOpen)}
                 className={`w-full group flex items-center px-2 py-2 text-base font-medium rounded-md ${
-                  location.pathname.includes("/products")
+                  location.pathname.includes("/post-product")
                     ? "bg-[#87CEEB] text-white"
                     : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#2196F3]"
                 }`}
@@ -81,9 +81,9 @@ export const Siderbar = ({ sidebarOpen, setSidebarOpen }) => {
               {productsOpen && (
                 <div className="pl-10 pr-2 mt-1 space-y-1">
                   <Link
-                    to="/products"
+                    to="/seller/products"
                     className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                      location.pathname === "/products"
+                      location.pathname === "seller/products"
                         ? "bg-[#87CEEB] text-white"
                         : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#2196F3]"
                     }`}
@@ -91,9 +91,9 @@ export const Siderbar = ({ sidebarOpen, setSidebarOpen }) => {
                     Product List
                   </Link>
                   <Link
-                    to="/products/create"
+                    to="/seller/post-product"
                     className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                      location.pathname === "/products/create"
+                      location.pathname === "/seller/post-product"
                         ? "bg-[#87CEEB] text-white"
                         : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#2196F3]"
                     }`}

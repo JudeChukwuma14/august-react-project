@@ -33,7 +33,7 @@ export const SellerLayout = () => {
   return loading ? (
     <Spinner />
   ) : (
-    <div className="flex h-screen bg-gray-400">
+    <div className="flex h-screen">
       <Siderbar sidebarOpen={sidebarOpen} setSiderbarOpen={setSiderbarOpen} />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Navbar sidebarOpen={sidebarOpen} setSiderbarOpen={setSiderbarOpen} />

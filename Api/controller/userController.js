@@ -3,6 +3,7 @@ const Seller = require("../models/sellerModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Product = require("../models/productModel");
+const cloudinary = require("../middleware/cloudinary")
 
 const signUp = async (req, res) => {
   try {
@@ -44,20 +45,16 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invaild credentials" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT);
-    const data = {
-      username: user.username,
-      email: user.email,
-      password: user.password,
-    }
-    res
-      .cookie("AUGUSTREACT", token, { expiresIn: "1hr" })
-      .status(200)
-      .json({
-        data,
-        token: token,
-        message: "Login successfull",
-      });
+    const token = jwt.sign({ id: user._id, role: "user" }, process.env.JWT, {
+      expiresIn: "1h",
+    });
+
+    res.cookie("AUGUSTREACT", token, { httpOnly: true, maxAge: 8600000 });
+    res.status(200).json({
+      data: { username: user.username, email: user.email },
+      token,
+      message: "Login successful",
+    });
   } catch (error) {
     res
       .status(500)
@@ -116,15 +113,24 @@ const loginSeller = async (req, res) => {
       return res.status(400).json({ message: "Invaild credentials" });
     }
 
-    const token = jwt.sign({ id: seller._id }, process.env.JWT);
-    res
-      .cookie("AUGUSTREACT", token, { expiresIn: "1hr" })
-      .status(200)
-      .json({
-        data: req.body,
-        token: token,
-        message: `Welcome ${seller.storeName}`,
-      });
+    const token = jwt.sign(
+      { id: seller._id, role: "seller" },
+      process.env.JWT,
+      { expiresIn: "1h" }
+    );
+
+    res.cookie("AUGUSTREACT", token, { httpOnly: true, maxAge: 8600000 });
+    res.status(200).json({
+      data: {
+        storeName: seller.storeName,
+        email: seller.email,
+        phoneNumber: seller.phoneNumber,
+        categories: seller.categories,
+        address: seller.address,
+      },
+      token,
+      message: `Welcome ${seller.storeName}`,
+    });
   } catch (error) {
     res
       .status(500)
