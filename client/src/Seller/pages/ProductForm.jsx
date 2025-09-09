@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const ProductForm = () => {
   const [formData, setFormData] = useState({
@@ -9,12 +10,13 @@ const ProductForm = () => {
     description: "",
     price: "",
     category: "",
+    isFeatured: false,
     images: [],
   });
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const token = useSelector((state) => state.seller.token || null);
-  console.log(token);
+  const navigate = useNavigate();
   const categories = [
     "Clothing",
     "Footwear",
@@ -24,10 +26,10 @@ const ProductForm = () => {
   ];
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -45,16 +47,8 @@ const ProductForm = () => {
       return;
     }
 
-    // Update formData with new images (limit to 5 for simplicity, adjust as needed)
+    // Update formData with new images (limit to 5)
     const newImages = files.slice(0, 5 - formData.images.length);
-    if (newImages.length + formData.images.length < 5 && files.length > 0) {
-      toast.error(
-        `Please select at least 5 images. Currently selected: ${
-          newImages.length + formData.images.length
-        }.`
-      );
-    }
-
     setFormData((prev) => ({
       ...prev,
       images: [...prev.images, ...newImages],
@@ -80,15 +74,6 @@ const ProductForm = () => {
       images: prev.images.filter((_, i) => i !== index),
     }));
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
-
-    // Check if the number of images is now less than 5
-    if (formData.images.length - 1 < 5) {
-      toast.error(
-        `Please select at least 5 images. Currently selected: ${
-          formData.images.length - 1
-        }.`
-      );
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -110,10 +95,8 @@ const ProductForm = () => {
       toast.error("Category is required.");
       return;
     }
-    if (formData.images.length < 5) {
-      toast.error(
-        `Please select at least 5 images. Currently selected: ${formData.images.length}.`
-      );
+    if (formData.images.length === 0) {
+      toast.error("At least one image is required.");
       return;
     }
     if (!token) {
@@ -127,11 +110,13 @@ const ProductForm = () => {
       const payload = new FormData();
       payload.append("title", formData.title);
       payload.append("description", formData.description);
-      payload.append("price", formData.price);
-      payload.append("category", formData.category);
+      payload.append("price", Number(formData.price));
+      payload.append("category", formData.category.toLowerCase());
+      payload.append("isFeatured", formData.isFeatured);
       formData.images.forEach((file) => {
         payload.append("images", file);
       });
+
       const response = await axios.post(
         "http://localhost:3000/api/product-upload",
         payload,
@@ -142,27 +127,34 @@ const ProductForm = () => {
           },
         }
       );
-      toast.success(response.message || "Product posted successfully!");
+
+      toast.success(response.data.message || "Product posted successfully!");
       setFormData({
         title: "",
         description: "",
         price: "",
         category: "",
+        isFeatured: false,
         images: [],
       });
       setImagePreviews([]);
-      // setTimeout(()=>navigate("/"), 2000) // Redirect
-      console.log(response);
+      setTimeout(() => navigate("/seller/post-product"), 2000);
     } catch (error) {
-      toast.error(error.response?.data?.message);
+      toast.error(error.response?.data?.message || "Failed to post product.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleSaveDraft = () => {
-    localStorage.setItem("ProductDraft", JSON.stringify(formData));
-    toast.success("Draft Save Sucessfully");
+    localStorage.setItem(
+      "ProductDraft",
+      JSON.stringify({
+        ...formData,
+        images: [], // Don't save files
+      })
+    );
+    toast.success("Draft saved successfully!");
   };
 
   return (
@@ -178,17 +170,13 @@ const ProductForm = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className=" rounded-lg shadow-sm  p-6">
+        <div className="rounded-lg shadow-sm p-6">
           {/* Product Images Section */}
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Product Images (Minimum 5)
+              Product Images (Max 5)
             </h2>
-            <p
-              className={`text-sm mb-2 ${
-                formData.images.length >= 5 ? "text-green-600" : "text-gray-500"
-              }`}
-            >
+            <p className="text-sm text-gray-500 mb-2">
               Selected: {formData.images.length}/5
             </p>
 
@@ -210,7 +198,7 @@ const ProductForm = () => {
                   />
                   <label
                     htmlFor="image-upload"
-                    className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors ${
+                    className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#36d7b7] transition-colors ${
                       formData.images.length >= 5
                         ? "opacity-50 cursor-not-allowed"
                         : ""
@@ -244,7 +232,7 @@ const ProductForm = () => {
                         or drag and drop
                       </p>
                       <p className="text-xs text-gray-500">
-                        PNG, JPG, or JPEG (MAX. 5MB each)
+                        PNG, JPG, or JPEG (MAX. 5MB each, up to 5 images)
                       </p>
                     </div>
                   </label>
@@ -317,7 +305,7 @@ const ProductForm = () => {
                   value={formData.title}
                   onChange={handleInputChange}
                   placeholder="e.g., Elegant Summer Dress"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36d7b7] focus:border-transparent"
                   required
                 />
               </div>
@@ -335,7 +323,7 @@ const ProductForm = () => {
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36d7b7] focus:border-transparent"
                   required
                 >
                   <option value="">Select a category</option>
@@ -366,7 +354,7 @@ const ProductForm = () => {
                     placeholder="0.00"
                     min="0"
                     step="0.01"
-                    className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36d7b7] focus:border-transparent"
                     required
                   />
                 </div>
@@ -387,12 +375,28 @@ const ProductForm = () => {
                   onChange={handleInputChange}
                   rows={4}
                   placeholder="Describe your product in detail..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36d7b7] focus:border-transparent resize-none"
                   required
                 />
                 <p className="mt-1 text-sm text-gray-500">
                   {formData.description.length}/500 characters
                 </p>
+              </div>
+
+              {/* Featured Checkbox */}
+              <div className="md:col-span-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="isFeatured"
+                    checked={formData.isFeatured}
+                    onChange={handleInputChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-[#36d7b7] border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">
+                    Mark as Featured (appears in Featured Collections)
+                  </span>
+                </label>
               </div>
             </div>
           </div>
@@ -402,6 +406,7 @@ const ProductForm = () => {
         <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
           <button
             type="button"
+            onClick={handleSaveDraft}
             className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
           >
             Save as Draft
@@ -409,7 +414,7 @@ const ProductForm = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+            className="px-6 py-2 bg-[#36d7b7] text-white rounded-md hover:bg-[#85f3dd] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
           >
             {isSubmitting ? (
               <>

@@ -4,12 +4,12 @@ import { useSelector } from "react-redux";
 export const Navbar = ({ setSidebarOpen }) => {
   const seller = useSelector((state) => state.seller.seller);
   const sellerFirstLetter = seller?.storeName?.charAt(0).toUpperCase();
-  console.log(sellerFirstLetter);
+
   return (
     <header className="sticky top-0 z-10 flex h-16 bg-white shadow">
       <button
         type="button"
-        className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#2196F3] md:hidden"
+        className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#36d7b7] md:hidden"
         onClick={() => setSidebarOpen(true)}
       >
         <span className="sr-only">Open sidebar</span>
@@ -24,7 +24,7 @@ export const Navbar = ({ setSidebarOpen }) => {
         <div className="flex items-center ml-4 md:ml-6">
           <button
             type="button"
-            className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2196F3]"
+            className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#36d7b7]"
           >
             <span className="sr-only">View notifications</span>
             <BellIcon className="w-6 h-6" aria-hidden="true" />
@@ -34,11 +34,15 @@ export const Navbar = ({ setSidebarOpen }) => {
           <div className="relative ml-3">
             <div>
               {sellerFirstLetter ? (
-                 <h1  className=" cursor-pointer font-bold text-xl bg-[#2196F3] text-white rounded-full h-[30px] w-[30px] flex justify-center items-center ring-4">{sellerFirstLetter}</h1>
+                <h1
+                  className="cursor-pointer font-bold text-xl bg-[#36d7b7] text-white rounded-full h-[30px] w-[30px] flex justify-center items-center ring-2"
+                >
+                  {sellerFirstLetter}
+                </h1>
               ) : (
                 <div
                   type="button"
-                  className="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2196F3]"
+                  className="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#36d7b7]"
                   id="user-menu-button"
                 >
                   <span className="sr-only">Open user menu</span>

@@ -2,8 +2,7 @@ const User = require("../models/userModel");
 const Seller = require("../models/sellerModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const Product = require("../models/productModel");
-const cloudinary = require("../middleware/cloudinary")
+
 
 const signUp = async (req, res) => {
   try {
@@ -138,43 +137,12 @@ const loginSeller = async (req, res) => {
   }
 };
 
-const postProduct = async (req, res) => {
-  try {
-    const { title, description, price, category } = req.body;
 
-    if (!title || !description || !price || !category) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-    let images = [];
-    if (req.files && Array.isArray(req.files)) {
-      const fileArray = req.files.slice(0, 5);
-      for (const file of fileArray) {
-        const uploadedImage = await cloudinary.uploader.upload(file.path);
-        images.push(uploadedImage.secure_url);
-      }
-    }
 
-    const product = await Product.create({
-      title,
-      description,
-      price,
-      category,
-      images: images,
-      seller: req.user._id,
-    });
-    return res
-      .status(201)
-      .json({ message: "Product Uploaded successfully", product });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Internal Server Error", error: error.message });
-  }
-};
+
 module.exports = {
   signUp,
   login,
   signupSeller,
   loginSeller,
-  postProduct,
 };
