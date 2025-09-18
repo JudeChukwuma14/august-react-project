@@ -16,7 +16,7 @@ const Login = lazy(() => import("../components/auth/Signin"));
 const SignupSeller = lazy(() => import("../components/auth/SignupSeller"));
 const LoginSeller = lazy(() => import("../components/auth/LoginSeller"));
 const Selectpath = lazy(() => import("../components/auth/Selectpath"));
-
+const Cart = lazy(() => import("../pages/Cart"));
 // seller pages
 const Dashboard = lazy(() => import("../Seller/pages/Dashboard"));
 const ProductFrom = lazy(() => import("../Seller/pages/ProductForm"));
@@ -56,6 +56,7 @@ const rotuerConfig = [
         path: "product/:id",
         element: withSuspense(ProductDetails),
       },
+      { path: "/cart", element: withSuspense(Cart) }
     ],
   },
   {

@@ -210,3 +210,18 @@ export const getStyleInspiration = async () => {
     );
   }
 };
+
+export const getProductById = async (id) => {
+  try {
+    const response = await api.get(`/${id}`);
+    console.log('getProductById response:', response.data);
+    const product = response.data;
+    return {
+      ...product,
+      category: product.category.toLowerCase() === 'clothes' ? 'clothing' : product.category.toLowerCase().replace(/ & /g, '-'),
+    };
+  } catch (error) {
+    console.error('getProductById error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to fetch product details');
+  }
+};

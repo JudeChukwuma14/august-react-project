@@ -1,23 +1,23 @@
-import { useState, useEffect } from 'react';
-import ProductCard from '../components/reuse/ProductCard';
-import { SkeletonProductCard } from '../components/reuse/SkeletonComponents';
-import { Search, Filter, Grid, List } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { getAllProduct, getShopByCategory } from '../service/userApi';
-import { toast } from 'react-toastify';
+import { useState, useEffect } from "react";
+import ProductCard from "../components/reuse/ProductCard";
+import { SkeletonProductCard } from "../components/reuse/SkeletonComponents";
+import { Search, Filter, Grid, List } from "lucide-react";
+import { Link } from "react-router-dom";
+import { getAllProduct, getShopByCategory } from "../service/userApi";
+import { toast } from "react-toastify";
 
 const Shop = () => {
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState("grid");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const categories = [
-    'All',
-    'Clothing',
-    'Footwear',
-    'Bags & Accessories',
-    'Undergarments',
-    'Kids & Baby Fashion',
+    "All",
+    "Clothing",
+    "Footwear",
+    "Bags & Accessories",
+    "Undergarments",
+    "Kids & Baby Fashion",
   ];
 
   useEffect(() => {
@@ -25,10 +25,13 @@ const Shop = () => {
       try {
         setLoading(true);
         let data;
-        if (selectedCategory === 'All') {
+        if (selectedCategory === "All") {
           data = await getAllProduct();
         } else {
-          const apiCategory = selectedCategory.toLowerCase().replace(/ & /g, '-').replace('clothes', 'clothing');
+          const apiCategory = selectedCategory
+            .toLowerCase()
+            .replace(/ & /g, "-")
+            .replace("clothes", "clothing");
           data = await getShopByCategory(apiCategory);
         }
         // Ensure data is an array
@@ -36,82 +39,95 @@ const Shop = () => {
         setProducts(
           productArray.map((p) => ({
             ...p,
-            title: p.title || 'Untitled Product',
+            title: p.title || "Untitled Product",
             price: Math.round(p.price || 0),
-            images: p.images?.length ? p.images : ['https://via.placeholder.com/150'],
-            seller: p.seller?.name ? { name: p.seller.name } : { name: 'Unknown Seller' },
+            images: p.images?.length
+              ? p.images
+              : ["https://via.placeholder.com/150"],
+            seller: p.seller?.storeName
+              ? { name: p.seller.storeName }
+              : { name: "Unknown Seller" },
             isNew: p.createdAt
               ? (new Date() - new Date(p.createdAt)) / (1000 * 60 * 60 * 24) < 7
               : false,
             isSale: p.originalPrice && p.price < p.originalPrice,
-            category: p.category.toLowerCase() === 'clothes' ? 'clothing' : p.category.toLowerCase(),
+            category:
+              p.category.toLowerCase() === "clothes"
+                ? "clothing"
+                : p.category.toLowerCase(),
           }))
         );
       } catch (error) {
-        toast.error(error.message || 'Failed to load products');
+        toast.error(error.message || "Failed to load products");
         // Fallback mock data
         setProducts([
           {
-            id: '1',
-            name: 'Elegant Summer Dress',
+            id: "1",
+            name: "Elegant Summer Dress",
             price: 89000,
             originalPrice: 120000,
-            image: 'https://i.pinimg.com/1200x/91/21/1d/91211d8810be0fb4456aca94730515f7.jpg',
-            seller: 'Boutique Style',
+            image:
+              "https://i.pinimg.com/1200x/91/21/1d/91211d8810be0fb4456aca94730515f7.jpg",
+            seller: "Boutique Style",
             rating: 4.8,
             isNew: true,
             isSale: true,
-            category: 'clothing',
+            category: "clothing",
           },
           {
-            id: '2',
-            name: 'Classic Sneakers',
+            id: "2",
+            name: "Classic Sneakers",
             price: 65000,
-            image: 'https://i.pinimg.com/1200x/91/21/1d/91211d8810be0fb4456aca94730515f7.jpg',
-            seller: 'Urban Fashion',
+            image:
+              "https://i.pinimg.com/1200x/91/21/1d/91211d8810be0fb4456aca94730515f7.jpg",
+            seller: "Urban Fashion",
             rating: 4.6,
             isNew: true,
-            category: 'footwear',
+            category: "footwear",
           },
           {
-            id: '3',
-            name: 'Minimalist Tote Bag',
+            id: "3",
+            name: "Minimalist Tote Bag",
             price: 45000,
-            image: 'https://i.pinimg.com/1200x/91/21/1d/91211d8810be0fb4456aca94730515f7.jpg',
-            seller: 'Eco Accessories',
+            image:
+              "https://i.pinimg.com/1200x/91/21/1d/91211d8810be0fb4456aca94730515f7.jpg",
+            seller: "Eco Accessories",
             rating: 4.9,
-            category: 'bags-accessories',
+            category: "bags-accessories",
           },
           {
-            id: '4',
-            name: 'Luxury Briefs',
+            id: "4",
+            name: "Luxury Briefs",
             price: 125000,
             originalPrice: 180000,
-            image: 'https://i.pinimg.com/1200x/91/21/1d/91211d8810be0fb4456aca94730515f7.jpg',
-            seller: 'Retro Vibes',
+            image:
+              "https://i.pinimg.com/1200x/91/21/1d/91211d8810be0fb4456aca94730515f7.jpg",
+            seller: "Retro Vibes",
             rating: 4.7,
             isSale: true,
-            category: 'undergarments',
+            category: "undergarments",
           },
           {
-            id: '5',
-            name: 'Kids Denim Jacket',
+            id: "5",
+            name: "Kids Denim Jacket",
             price: 55000,
-            image: 'https://i.pinimg.com/1200x/91/21/1d/91211d8810be0fb4456aca94730515f7.jpg',
-            seller: 'Boho Chic',
+            image:
+              "https://i.pinimg.com/1200x/91/21/1d/91211d8810be0fb4456aca94730515f7.jpg",
+            seller: "Boho Chic",
             rating: 4.5,
-            category: 'kids-baby-fashion',
+            category: "kids-baby-fashion",
           },
           {
-            id: '6',
-            name: 'Designer Sunglasses',
+            id: "6",
+            name: "Designer Sunglasses",
             price: 150000,
             originalPrice: 200000,
-            image: 'https://i.pinimg.com/1200x/91/21/1d/91211d8810be0fb4456aca94730515f7.jpg',
-            seller: 'Luxury Finds',
+            image:
+              "https://i.pinimg.com/1200x/91/21/1d/91211d8810be0fb4456aca94730515f7.jpg",
+            seller: "Luxury Finds",
             rating: 4.9,
             isSale: true,
-            category: 'bags-accessories',
+            category: "bags-accessories",
           },
         ]);
       } finally {
@@ -151,21 +167,21 @@ const Shop = () => {
             <div className="flex border rounded-lg p-1">
               <button
                 className={`px-3 h-9 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === 'grid'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-accent hover:text-accent-foreground'
+                  viewMode === "grid"
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-accent hover:text-accent-foreground"
                 }`}
-                onClick={() => setViewMode('grid')}
+                onClick={() => setViewMode("grid")}
               >
                 <Grid className="h-4 w-4" />
               </button>
               <button
                 className={`px-3 h-9 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === 'list'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-accent hover:text-accent-foreground'
+                  viewMode === "list"
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-accent hover:text-accent-foreground"
                 }`}
-                onClick={() => setViewMode('list')}
+                onClick={() => setViewMode("list")}
               >
                 <List className="h-4 w-4" />
               </button>
@@ -180,12 +196,12 @@ const Shop = () => {
           {categories.map((category) => (
             <Link
               key={category}
-              to={`/categories/${category.toLowerCase().replace(/ & /g, '-')}`}
+              to={`/categories/${category.toLowerCase().replace(/ & /g, "-")}`}
               onClick={() => setSelectedCategory(category)}
               className={`cursor-pointer px-3 py-1 rounded-full text-sm font-medium transition-smooth ${
                 selectedCategory === category
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground'
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground"
               }`}
             >
               {category}
@@ -203,16 +219,18 @@ const Shop = () => {
 
       {/* Products Grid/List */}
       <div
-        className={`grid gap-6 ${
-          viewMode === 'grid'
-            ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-            : 'grid-cols-1 lg:grid-cols-2'
+        className={`grid gap-4 ${
+          viewMode === "grid"
+            ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+            : "grid-cols-1 lg:grid-cols-3"
         }`}
       >
         {loading
           ? Array(6)
               .fill()
-              .map((_, i) => <SkeletonProductCard key={i} viewMode={viewMode} />)
+              .map((_, i) => (
+                <SkeletonProductCard key={i} viewMode={viewMode} />
+              ))
           : products.map((product) => (
               <ProductCard
                 key={product._id || product.id}

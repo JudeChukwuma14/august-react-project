@@ -1,57 +1,156 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
 import { ArrowLeft, Heart, Share2, Star, Plus, Minus } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { addItem } from '../redux/slices/cartSlices';
+import { getProductById } from '../service/userApi';
+import { toast } from 'react-toastify';
 
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('M');
   const [activeTab, setActiveTab] = useState('description');
+  const [currentImage, setCurrentImage] = useState(0);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock product data - in real app, fetch based on ID
-  const product = {
+  // Fallback mock data
+  const mockProduct = {
     id: id || '1',
-    name: 'Elegant Summer Dress',
-    price: 89,
-    originalPrice: 120,
-    images: ['https://i.pinimg.com/736x/ae/f5/ab/aef5ab486f2e361248cde0722fe2fcac.jpg', 'https://i.pinimg.com/736x/b7/00/8c/b7008c7529a2a77fc59d6d13ef291ca5.jpg', 'https://i.pinimg.com/736x/c9/f3/72/c9f372338b9f33009827e016c809dc83.jpg'],
-    seller: 'Boutique Style',
+    title: 'Elegant Summer Dress',
+    price: 89000,
+    originalPrice: 120000,
+    images: [
+      'https://i.pinimg.com/736x/ae/f5/ab/aef5ab486f2e361248cde0722fe2fcac.jpg',
+      'https://i.pinimg.com/736x/b7/00/8c/b7008c7529a2a77fc59d6d13ef291ca5.jpg',
+      'https://i.pinimg.com/736x/c9/f3/72/c9f372338b9f33009827e016c809dc83.jpg',
+    ],
+    seller: { storeName: 'Boutique Style' },
     rating: 4.8,
     reviews: 156,
     isNew: true,
-    isSale: true,
-    description: 'This elegant summer dress combines comfort with style. Perfect for any occasion, featuring a flattering silhouette and premium fabric blend.',
+    isFeatured: true,
+    description:
+      'This elegant summer dress combines comfort with style. Perfect for any occasion, featuring a flattering silhouette and premium fabric blend.',
     features: [
       'High-quality fabric blend',
       'Machine washable',
       'Wrinkle resistant',
-      'Available in multiple colors'
+      'Available in multiple colors',
     ],
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     colors: ['Navy', 'Black', 'White', 'Rose'],
     specifications: {
-      'Material': '65% Cotton, 35% Polyester',
-      'Care': 'Machine wash cold',
-      'Origin': 'Made in Italy',
-      'Fit': 'True to size'
-    }
+      Material: '65% Cotton, 35% Polyester',
+      Care: 'Machine wash cold',
+      Origin: 'Made in Italy',
+      Fit: 'True to size',
+    },
   };
 
-  const [currentImage, setCurrentImage] = useState(0);
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const data = await getProductById(id);
+        setProduct({
+          ...data,
+          title: data.title || 'Untitled Product',
+          price: Math.round(data.price || 0),
+          images: data.images?.length ? data.images : ['https://via.placeholder.com/150'],
+          seller: data.seller?.storeName ? { storeName: data.seller.storeName } : { storeName: 'Unknown Seller' },
+          isNew: data.createdAt
+            ? (new Date() - new Date(data.createdAt)) / (1000 * 60 * 60 * 24) < 7
+            : false,
+          isFeatured: data.isFeatured || false,
+          rating: data.rating || 0,
+          reviews: data.reviews || 0,
+          sizes: data.sizes || ['XS', 'S', 'M', 'L', 'XL'],
+          description: data.description || 'No description available.',
+          features: data.features || [],
+          specifications: data.specifications || {},
+        });
+      } catch (error) {
+        toast.error(error.message || 'Failed to load product details');
+        setProduct(mockProduct);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [id]);
 
   const handleAddToCart = () => {
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.images[0],
-      seller: product.seller,
-      size: selectedSize,
-    });
-
+    dispatch(
+      addItem({
+        id: product._id || product.id,
+        name: product.title || product.name,
+        price: product.price,
+        image: product.images[0],
+        seller: product.seller.storeName,
+        size: selectedSize,
+        quantity,
+      })
+    );
+    toast.success(`${product.title || product.name} added to cart!`);
   };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse">
+          <div className="h-6 w-32 bg-muted mb-6" />
+          <div className="grid lg:grid-cols-2 gap-12">
+            <div className="space-y-4">
+              <div className="aspect-square bg-muted rounded-lg" />
+              <div className="flex gap-2">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="w-20 h-20 bg-muted rounded-lg" />
+                ))}
+              </div>
+            </div>
+            <div className="space-y-6">
+              <div className="h-4 w-48 bg-muted" />
+              <div className="h-8 w-64 bg-muted" />
+              <div className="h-4 w-32 bg-muted" />
+              <div className="h-10 w-40 bg-muted" />
+              <div className="flex gap-2">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="h-9 w-12 bg-muted rounded-md" />
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <div className="h-9 w-12 bg-muted rounded-md" />
+                <div className="h-9 w-12 bg-muted rounded-md" />
+              </div>
+              <div className="h-10 w-full bg-muted rounded-md" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return <div className="container mx-auto px-4 py-8">Product not found</div>;
+  }
+
+  const formattedPrice = new Intl.NumberFormat('en-NG', {
+    style: 'decimal',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(product.price);
+
+  const formattedOriginalPrice = product.originalPrice
+    ? new Intl.NumberFormat('en-NG', {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(product.originalPrice)
+    : null;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -69,12 +168,12 @@ const ProductDetails = () => {
           <div className="relative aspect-square overflow-hidden rounded-lg">
             <img
               src={product.images[currentImage]}
-              alt={product.name}
+              alt={product.title || product.name}
               className="w-full h-full object-cover"
             />
-            {product.isSale && (
+            {product.isFeatured && (
               <span className="absolute top-4 left-4 bg-accent text-accent-foreground px-2 py-1 rounded-md text-xs font-medium">
-                Sale
+                Featured
               </span>
             )}
             {product.isNew && (
@@ -83,7 +182,7 @@ const ProductDetails = () => {
               </span>
             )}
           </div>
-          
+
           <div className="flex gap-2 overflow-x-auto">
             {product.images.map((image, index) => (
               <button
@@ -97,7 +196,7 @@ const ProductDetails = () => {
               >
                 <img
                   src={image}
-                  alt={`${product.name} ${index + 1}`}
+                  alt={`${product.title || product.name} ${index + 1}`}
                   className="w-full h-full object-cover"
                 />
               </button>
@@ -109,36 +208,36 @@ const ProductDetails = () => {
         <div className="space-y-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-4 w-4 ${
-                      i < Math.floor(product.rating)
-                        ? 'fill-primary text-primary'
-                        : 'text-muted-foreground'
-                    }`}
-                  />
-                ))}
-              </div>
+              {product.rating > 0 && (
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-4 w-4 ${
+                        i < Math.floor(product.rating)
+                          ? 'fill-primary text-primary'
+                          : 'text-muted-foreground'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
               <span className="text-sm text-muted-foreground">
-                {product.rating} ({product.reviews} reviews)
+                {product.rating > 0 ? `${product.rating} (${product.reviews} reviews)` : 'No reviews'}
               </span>
             </div>
-            
+
             <h1 className="text-3xl font-playfair font-bold mb-2">
-              {product.name}
+              {product.title || product.name}
             </h1>
-            
-            <p className="text-muted-foreground mb-4">by {product.seller}</p>
-            
+
+            <p className="text-muted-foreground mb-4">by {product.seller.storeName}</p>
+
             <div className="flex items-center gap-3 mb-6">
-              <span className="text-3xl font-bold text-primary">
-                ${product.price}
-              </span>
-              {product.originalPrice && (
+              <span className="text-3xl font-bold text-primary">₦{formattedPrice}</span>
+              {formattedOriginalPrice && (
                 <span className="text-xl text-muted-foreground line-through">
-                  ${product.originalPrice}
+                  ₦{formattedOriginalPrice}
                 </span>
               )}
             </div>
@@ -152,8 +251,8 @@ const ProductDetails = () => {
                 <button
                   key={size}
                   className={`h-9 px-3 rounded-md text-sm font-medium transition-colors ${
-                    selectedSize === size 
-                      ? 'bg-primary text-primary-foreground' 
+                    selectedSize === size
+                      ? 'bg-primary text-primary-foreground'
                       : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
                   }`}
                   onClick={() => setSelectedSize(size)}
@@ -186,8 +285,8 @@ const ProductDetails = () => {
 
           {/* Actions */}
           <div className="flex gap-3">
-            <button 
-              onClick={handleAddToCart} 
+            <button
+              onClick={handleAddToCart}
               className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md text-sm font-medium transition-colors"
             >
               Add to Cart
@@ -217,7 +316,7 @@ const ProductDetails = () => {
                 </button>
               ))}
             </div>
-            
+
             <div className="mt-4">
               {activeTab === 'description' && (
                 <div className="space-y-4">
@@ -232,7 +331,7 @@ const ProductDetails = () => {
                   </ul>
                 </div>
               )}
-              
+
               {activeTab === 'specifications' && (
                 <div className="space-y-3">
                   {Object.entries(product.specifications).map(([key, value]) => (
@@ -243,18 +342,18 @@ const ProductDetails = () => {
                   ))}
                 </div>
               )}
-              
+
               {activeTab === 'reviews' && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 mb-6">
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{product.rating}</div>
+                      <div className="text-3xl font-bold">{product.rating || 'N/A'}</div>
                       <div className="flex justify-center mb-1">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
                             className={`h-3 w-3 ${
-                              i < Math.floor(product.rating)
+                              i < Math.floor(product.rating || 0)
                                 ? 'fill-primary text-primary'
                                 : 'text-muted-foreground'
                             }`}
@@ -262,11 +361,11 @@ const ProductDetails = () => {
                         ))}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {product.reviews} reviews
+                        {product.reviews || 0} reviews
                       </div>
                     </div>
                   </div>
-                  
+
                   <p className="text-muted-foreground text-center py-8">
                     Review functionality would be implemented with backend integration.
                   </p>

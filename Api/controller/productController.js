@@ -1,52 +1,58 @@
 const Product = require("../models/productModel");
-const cloudinary = require("../middleware/cloudinary")
+const cloudinary = require("../middleware/cloudinary");
 
-// Helper function for error handling
 const handleError = (res, error) => {
-    res
-        .status(500)
-        .json({ message: "Internal Server Error", error: error.message });
+    console.error("Error details:", error);
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
 };
 
 const postProduct = async (req, res) => {
     try {
         const { title, description, price, category, isFeatured } = req.body;
-
         if (!title || !description || !price || !category) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
-        // Convert price to number
         const parsedPrice = Number(price);
         if (isNaN(parsedPrice) || parsedPrice < 0) {
-            return res.status(400).json({ message: 'Price must be a non-negative number' });
+            return res.status(400).json({ message: "Price must be a non-negative number" });
         }
 
         let images = [];
         if (req.files && Array.isArray(req.files)) {
             const fileArray = req.files.slice(0, 5);
             for (const file of fileArray) {
-                const uploadedImage = await cloudinary.uploader.upload(file.path);
+                const uploadedImage = await new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream(
+                        { resource_type: "image" },
+                        (error, result) => {
+                            if (error) return reject(error);
+                            resolve(result);
+                        }
+                    );
+                    stream.end(file.buffer);
+                });
                 images.push(uploadedImage.secure_url);
             }
         }
-
         const product = await Product.create({
             title: title.trim(),
             description: description.trim(),
-            price,
+            price: parsedPrice,
             category: category.toLowerCase(),
             images: images,
             seller: req.user._id,
             isFeatured: Boolean(isFeatured),
         });
-        return res
-            .status(201)
-            .json({ message: "Product Uploaded successfully", product });
+
+        return res.status(201).json({ message: "Product uploaded successfully", product });
     } catch (error) {
         handleError(res, error);
     }
 };
+
+
+
 
 // 1. Trending This Week (High views/sales in last 7 days)
 const getTrendingThisWeek = async (req, res) => {
@@ -56,7 +62,7 @@ const getTrendingThisWeek = async (req, res) => {
             createdAt: { $gte: sevenDaysAgo },
             $or: [{ views: { $gte: 50 } }, { sales: { $gte: 10 } }],
         })
-            .populate("seller", "name") // Adjust field based on Seller schema
+            .populate("seller", "storeName") // Adjust field based on Seller schema
             .sort({ views: -1, sales: -1 })
             .limit(10);
         return res.status(200).json(trendingProducts);
@@ -73,7 +79,7 @@ const getWhatsHotThisWeek = async (req, res) => {
             createdAt: { $gte: sevenDaysAgo },
             sales: { $gte: 10 },
         })
-            .populate("seller", "name")
+            .populate("seller", "storeName")
             .sort({ sales: -1 })
             .limit(10);
         return res.status(200).json(hotProducts);
@@ -86,7 +92,7 @@ const getWhatsHotThisWeek = async (req, res) => {
 const getFeaturedCollections = async (req, res) => {
     try {
         const featuredProducts = await Product.find({ isFeatured: true })
-            .populate("seller", "name")
+            .populate("seller", "storeName")
             .sort({ createdAt: -1 })
             .limit(10);
         return res.status(200).json(featuredProducts);
@@ -103,9 +109,10 @@ const getShopByCategory = async (req, res) => {
             return res.status(400).json({ message: "Category is required" });
         }
         const products = await Product.find({ category: category.toLowerCase() })
-            .populate("seller", "name")
+            .populate("seller", "storeName")
             .sort({ createdAt: -1 })
             .limit(20);
+
         return res.status(200).json(products);
     } catch (error) {
         handleError(res, error);
@@ -120,7 +127,7 @@ const getSpecialOffers = async (req, res) => {
             return res.status(401).json({ message: "User authentication required" });
         }
         const specialOffers = await Product.find({})
-            .populate("seller", "name")
+            .populate("seller", "storeName")
             .sort({ createdAt: -1 })
             .limit(10);
         return res.status(200).json(specialOffers);
@@ -133,7 +140,7 @@ const getSpecialOffers = async (req, res) => {
 const getStyleInspiration = async (req, res) => {
     try {
         const inspirationProducts = await Product.find({ isFeatured: true })
-            .populate("seller", "name")
+            .populate("seller", "storeName")
             .sort({ createdAt: -1 })
             .limit(10);
         return res.status(200).json(inspirationProducts);
@@ -148,7 +155,7 @@ const getAllProduct = async (req, res) => {
         const { category } = req.query;
         const query = category ? { category: category.toLowerCase() } : {};
         const allProduct = await Product.find(query)
-            .populate("seller", "name")
+            .populate("seller", "storeName")
             .sort({ createdAt: -1 });
         return res.status(200).json(allProduct);
     } catch (error) {
@@ -157,70 +164,86 @@ const getAllProduct = async (req, res) => {
 };
 
 const getSellerProducts = async (req, res) => {
-  try {
-    const sellerId = req.user._id; 
-    const { category } = req.query; 
-    const query = { seller: sellerId };
-    if (category) query.category = category.toLowerCase();
+    try {
+        const sellerId = req.user._id;
+        const { category } = req.query;
+        const query = { seller: sellerId };
+        if (category) query.category = category.toLowerCase();
 
-    const products = await Product.find(query)
-      .populate('seller', 'name')
-      .sort({ createdAt: -1 });
+        const products = await Product.find(query)
+            .populate('seller', 'name')
+            .sort({ createdAt: -1 });
 
-    return res.status(200).json(products);
-  } catch (error) {
-    return res.status(500).json({ message: 'Internal Server Error', error: error.message });
-  }
+        return res.status(200).json(products);
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
 };
 
 const updateProduct = async (req, res) => {
-  try {
-    const { title, description, price, category, isFeatured } = req.body;
-    const product = await Product.findOne({ _id: req.params.id, seller: req.user._id });
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found or not owned by seller' });
-    }
+    try {
+        const { title, description, price, category, isFeatured } = req.body;
+        const product = await Product.findOne({ _id: req.params.id, seller: req.user._id });
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found or not owned by seller' });
+        }
 
-    // Validate required fields
-    if (!title || !description || !price || !category) {
-      return res.status(400).json({ message: 'Title, description, price, and category are required' });
-    }
-    const parsedPrice = Number(price);
-    if (isNaN(parsedPrice) || parsedPrice < 0) {
-      return res.status(400).json({ message: 'Price must be a non-negative number' });
-    }
+        // Validate required fields
+        if (!title || !description || !price || !category) {
+            return res.status(400).json({ message: 'Title, description, price, and category are required' });
+        }
+        const parsedPrice = Number(price);
+        if (isNaN(parsedPrice) || parsedPrice < 0) {
+            return res.status(400).json({ message: 'Price must be a non-negative number' });
+        }
 
-    // Update fields
-    product.title = title.trim();
-    product.description = description.trim();
-    product.price = parsedPrice;
-    product.category = category.toLowerCase();
-    product.isFeatured = Boolean(isFeatured);
+        // Update fields
+        product.title = title.trim();
+        product.description = description.trim();
+        product.price = parsedPrice;
+        product.category = category.toLowerCase();
+        product.isFeatured = Boolean(isFeatured);
 
-    await product.save();
-    return res.status(200).json({ message: 'Product updated successfully', product });
-  } catch (error) {
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ message: error.message });
+        await product.save();
+        return res.status(200).json({ message: 'Product updated successfully', product });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
+        return res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
-    return res.status(500).json({ message: 'Internal Server Error', error: error.message });
-  }
 };
 
 
 const deleteProduct = async (req, res) => {
-  try {
-    const product = await Product.findOne({ _id: req.params.id, seller: req.user._id });
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found or not owned by seller' });
+    try {
+        const product = await Product.findOne({ _id: req.params.id, seller: req.user._id });
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found or not owned by seller' });
+        }
+        await product.deleteOne();
+        return res.status(200).json({ message: 'Product deleted successfully' });
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
-    await product.deleteOne();
-    return res.status(200).json({ message: 'Product deleted successfully' });
-  } catch (error) {
-    return res.status(500).json({ message: 'Internal Server Error', error: error.message });
-  }
 };
 
+
+const getProductById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const product = await Product.findById(id).populate('seller', 'storeName');
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+        return res.status(200).json({
+            ...product._doc,
+            category: product.category.toLowerCase() === 'clothes' ? 'clothing' : product.category.toLowerCase().replace(/ & /g, '-'),
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
 
 module.exports = {
     postProduct,
@@ -233,5 +256,6 @@ module.exports = {
     getStyleInspiration,
     getSellerProducts,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    getProductById,
 };

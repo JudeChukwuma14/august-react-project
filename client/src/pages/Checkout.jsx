@@ -1,375 +1,360 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CreditCard, Truck, Shield } from "lucide-react";
+import React from "react";
+import { useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { Country, State, City } from "country-state-city";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
+import { ShoppingBag } from "lucide-react";
+import { toast } from "react-toastify";
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const [isProcessing, setIsProcessing] = useState(false);
-  let total = 40;
-  const shippingCost = total > 75 ? 0 : 9.99;
-  const tax = total * 0.08;
-  const finalTotal = total + shippingCost + tax;
+  const cartItems = useSelector((state) => state.cart.items);
 
-  const [formData, setFormData] = useState({
-    email: "",
-    firstName: "",
-    lastName: "",
-    address: "",
-    city: "",
-    postalCode: "",
-    country: "",
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "", 
-    nameOnCard: "",
+  // react-hook-form setup
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      address: "",
+      country: "",
+      state: "",
+      city: "",
+      phone: "",
+    },
   });
 
-  const handleInputChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+  // Watch country and state for dynamic dropdowns
+  const selectedCountry = watch("country");
+  const selectedState = watch("state");
+
+  // Get country, state, and city data
+  const countries = Country.getAllCountries();
+  const states = selectedCountry
+    ? State.getStatesOfCountry(selectedCountry)
+    : [];
+  const cities = selectedState
+    ? City.getCitiesOfState(selectedCountry, selectedState)
+    : [];
+
+  // Calculate total price
+  const totalPrice = cartItems.reduce(
+    (total, item) => total + item.price * (item.quantity || 1),
+    0
+  );
+
+  // Format price in NGN
+  const formatPrice = (price) =>
+    new Intl.NumberFormat("en-NG", {
+      style: "decimal",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(Math.round(price));
+
+  // Handle form submission
+  const onSubmit = (data) => {
+    // Simulate order processing (replace with actual API call)
+    console.log("Checkout data:", { ...data, cartItems, totalPrice });
+    toast.success("Order placed successfully!");
+    // Optionally clear cart here using dispatch(resetCart());
+    navigate("/order-confirmation"); // Redirect to a confirmation page
   };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsProcessing(true);
-
-    // Simulate processing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    clearCart();
-    navigate("/orders");
-    setIsProcessing(false);
-  };
-
-  if (length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-8 h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
-          <button
-            onClick={() => navigate("/shop")}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md text-sm font-medium transition-colors"
-          >
-            Continue Shopping
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-6 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground px-3 py-2 rounded-md transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Cart
-      </button>
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-4xl font-playfair font-bold text-center mb-8">
+          Checkout
+        </h1>
 
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* Checkout Form */}
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-playfair font-bold mb-2">Checkout</h1>
-            <p className="text-muted-foreground">Complete your purchase</p>
+        {cartItems.length === 0 ? (
+          <div className="text-center py-12">
+            <ShoppingBag className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-lg text-muted-foreground mb-6">
+              Your cart is empty
+            </p>
+            <Link
+              to="/shop"
+              className="inline-flex items-center px-6 py-3 bg-[#36d7b7] text-white rounded-md text-sm font-medium hover:bg-[#2abca0] transition-colors"
+            >
+              Start Shopping
+            </Link>
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Contact Information */}
-            <div className="bg-card rounded-lg shadow-card p-6">
-              <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
-                <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">
-                  1
-                </div>
-                Contact Information
-              </h3>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Email
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                />
-              </div>
-            </div>
-
-            {/* Shipping Address */}
-            <div className="bg-card rounded-lg shadow-card p-6">
-              <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
-                <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">
-                  2
-                </div>
-                Shipping Address
-              </h3>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      htmlFor="firstName"
-                      className="block text-sm font-medium mb-1"
-                    >
-                      First Name
-                    </label>
-                    <input
-                      id="firstName"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="lastName"
-                      className="block text-sm font-medium mb-1"
-                    >
-                      Last Name
-                    </label>
-                    <input
-                      id="lastName"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label
-                    htmlFor="address"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Address
-                  </label>
-                  <input
-                    id="address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      htmlFor="city"
-                      className="block text-sm font-medium mb-1"
-                    >
-                      City
-                    </label>
-                    <input
-                      id="city"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="postalCode"
-                      className="block text-sm font-medium mb-1"
-                    >
-                      Postal Code
-                    </label>
-                    <input
-                      id="postalCode"
-                      name="postalCode"
-                      value={formData.postalCode}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment Information */}
-            <div className="bg-card rounded-lg shadow-card p-6">
-              <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
-                <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">
-                  3
-                </div>
-                Payment Information
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="cardNumber"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Card Number
-                  </label>
-                  <input
-                    id="cardNumber"
-                    name="cardNumber"
-                    placeholder="1234 5678 9012 3456"
-                    value={formData.cardNumber}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      htmlFor="expiryDate"
-                      className="block text-sm font-medium mb-1"
-                    >
-                      Expiry Date
-                    </label>
-                    <input
-                      id="expiryDate"
-                      name="expiryDate"
-                      placeholder="MM/YY"
-                      value={formData.expiryDate}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="cvv"
-                      className="block text-sm font-medium mb-1"
-                    >
-                      CVV
-                    </label>
-                    <input
-                      id="cvv"
-                      name="cvv"
-                      placeholder="123"
-                      value={formData.cvv}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label
-                    htmlFor="nameOnCard"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Name on Card
-                  </label>
-                  <input
-                    id="nameOnCard"
-                    name="nameOnCard"
-                    value={formData.nameOnCard}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                  />
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        {/* Order Summary */}
-        <div className="space-y-6">
-          <div className="bg-card rounded-lg shadow-card p-6">
-            <h3 className="text-lg font-semibold mb-4">Order Summary</h3>
-            <div className="space-y-4">
-              {items.map((item) => (
-                <div key={item.id} className="flex gap-3">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-16 h-16 object-cover rounded"
-                  />
-                  <div className="flex-1">
-                    <h4 className="font-medium text-sm">{item.name}</h4>
-                    <p className="text-xs text-muted-foreground">
-                      by {item.seller} • Size: {item.size}
-                    </p>
-                    <p className="text-sm">
-                      ${item.price} × {item.quantity}
-                    </p>
-                  </div>
-                  <div className="font-semibold">
-                    ${(item.price * item.quantity).toFixed(2)}
-                  </div>
-                </div>
-              ))}
-
-              <div className="border-t border-border pt-4 mt-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Subtotal</span>
-                    <span>${total.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Shipping</span>
-                    <span>
-                      {shippingCost === 0 ? (
-                        <span className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs font-medium">
-                          Free
-                        </span>
-                      ) : (
-                        `$${shippingCost.toFixed(2)}`
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tax</span>
-                    <span>${tax.toFixed(2)}</span>
-                  </div>
-                  <div className="border-t border-border pt-2 mt-2">
-                    <div className="flex justify-between font-bold text-lg">
+        ) : (
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Order Summary */}
+            <div className="lg:col-span-1 order-last lg:order-first">
+              <div className="bg-white shadow-card rounded-lg p-6 sticky top-4">
+                <h2 className="text-2xl font-semibold mb-4">Order Summary</h2>
+                <div className="space-y-4">
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">
+                        {item.name} (x{item.quantity || 1})
+                      </span>
+                      <span>
+                        ₦{formatPrice(item.price * (item.quantity || 1))}
+                      </span>
+                    </div>
+                  ))}
+                  <div className="border-t border-gray-200 pt-4">
+                    <div className="flex justify-between font-semibold">
                       <span>Total</span>
-                      <span>${finalTotal.toFixed(2)}</span>
+                      <span>₦{formatPrice(totalPrice)}</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Security Features */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Shield className="h-4 w-4" />
-              Secure 256-bit SSL encryption
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <CreditCard className="h-4 w-4" />
-              Multiple payment methods accepted
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Truck className="h-4 w-4" />
-              Free shipping on orders over $75
+            {/* Checkout Form */}
+            <div className="lg:col-span-2">
+              <div className="bg-white shadow-card rounded-lg p-6">
+                <h2 className="text-2xl font-semibold mb-6">
+                  Shipping Information
+                </h2>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                  {/* First Name and Last Name */}
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        First Name
+                      </label>
+                      <input
+                        {...register("firstName", {
+                          required: "First name is required",
+                        })}
+                        className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#36d7b7] focus:border-[#36d7b7] outline-none"
+                        placeholder="First Name"
+                      />
+                      {errors.firstName && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.firstName.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Last Name
+                      </label>
+                      <input
+                        {...register("lastName", {
+                          required: "Last name is required",
+                        })}
+                        className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#36d7b7] focus:border-[#36d7b7] outline-none"
+                        placeholder="Last Name"
+                      />
+                      {errors.lastName && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.lastName.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {/* Email */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        {...register("email", {
+                          required: "Email is required",
+                          pattern: {
+                            value:
+                              /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                            message: "Invalid email address",
+                          },
+                        })}
+                        className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#36d7b7] focus:border-[#36d7b7] outline-none"
+                        placeholder="Email"
+                      />
+                      {errors.email && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.email.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Address */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Address
+                      </label>
+                      <input
+                        {...register("address", {
+                          required: "Address is required",
+                        })}
+                        className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#36d7b7] focus:border-[#36d7b7] outline-none"
+                        placeholder="Street Address"
+                      />
+                      {errors.address && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.address.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {/* Country */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Country
+                      </label>
+                      <Controller
+                        name="country"
+                        control={control}
+                        rules={{ required: "Country is required" }}
+                        render={({ field }) => (
+                          <select
+                            {...field}
+                            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#36d7b7] focus:border-[#36d7b7] outline-none"
+                            onChange={(e) => {
+                              field.onChange(e.target.value);
+                              // Reset state and city when country changes
+                              field.onChange(e.target.value);
+                            }}
+                          >
+                            <option value="">Select Country</option>
+                            {countries.map((country) => (
+                              <option
+                                key={country.isoCode}
+                                value={country.isoCode}
+                              >
+                                {country.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      />
+                      {errors.country && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.country.message}
+                        </p>
+                      )}
+                    </div>
+                    {/* State */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        State
+                      </label>
+                      <Controller
+                        name="state"
+                        control={control}
+                        rules={{ required: "State is required" }}
+                        render={({ field }) => (
+                          <select
+                            {...field}
+                            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#36d7b7] focus:border-[#36d7b7] outline-none"
+                            disabled={!selectedCountry}
+                            onChange={(e) => {
+                              field.onChange(e.target.value);
+                              // Reset city when state changes
+                              field.onChange(e.target.value);
+                            }}
+                          >
+                            <option value="">Select State</option>
+                            {states.map((state) => (
+                              <option key={state.isoCode} value={state.isoCode}>
+                                {state.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      />
+                      {errors.state && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.state.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {/* City */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        City
+                      </label>
+                      <Controller
+                        name="city"
+                        control={control}
+                        rules={{ required: "City is required" }}
+                        render={({ field }) => (
+                          <select
+                            {...field}
+                            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#36d7b7] focus:border-[#36d7b7] outline-none"
+                            disabled={!selectedState}
+                          >
+                            <option value="">Select City</option>
+                            {cities.map((city) => (
+                              <option key={city.name} value={city.name}>
+                                {city.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      />
+                      {errors.city && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.city.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Phone */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Phone
+                      </label>
+                      <Controller
+                        name="phone"
+                        control={control}
+                        rules={{ required: "Phone number is required" }}
+                        render={({ field }) => (
+                          <PhoneInput
+                            country={"ng"} // Default to Nigeria
+                            value={field.value}
+                            onChange={field.onChange}
+                            inputClass="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#36d7b7] focus:border-[#36d7b7] outline-none"
+                            containerClass="mt-1"
+                            buttonClass="border border-gray-300"
+                          />
+                        )}
+                      />
+                      {errors.phone && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.phone.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {/* Submit Button */}
+                  <div className="flex justify-between items-center">
+                    <Link to="/cart" className="text-[#36d7b7] hover:underline">
+                      Back to Cart
+                    </Link>
+                    <button
+                      type="submit"
+                      className="px-6 py-3 bg-[#36d7b7] text-white rounded-md text-sm font-medium hover:bg-[#2abca0] transition-colors"
+                    >
+                      Place Order
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-
-          <button
-            onClick={handleSubmit}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50"
-            disabled={isProcessing}
-          >
-            {isProcessing
-              ? "Processing..."
-              : `Place Order - $${finalTotal.toFixed(2)}`}
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );

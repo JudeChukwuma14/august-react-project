@@ -20,7 +20,7 @@ import {
 import heroImage from "../assets/images/homebg.jpg";
 import { Link } from "react-router-dom";
 import {
-  getTrendingThisWeek,
+  getAllProduct, // Import the getAllProduct endpoint
   getWhatsHotThisWeek,
   getFeaturedCollections,
   getShopByCategory,
@@ -89,38 +89,11 @@ const Home = () => {
     },
   ];
 
-  const brands = [
-    {
-      name: "Boutique Style",
-      logo: "https://i.pinimg.com/736x/ae/f5/ab/aef5ab486f2e361248cde0722fe2fcac.jpg",
-    },
-    {
-      name: "Urban Fashion",
-      logo: "https://i.pinimg.com/736x/ae/f5/ab/aef5ab486f2e361248cde0722fe2fcac.jpg",
-    },
-    {
-      name: "Eco Accessories",
-      logo: "https://i.pinimg.com/736x/ae/f5/ab/aef5ab486f2e361248cde0722fe2fcac.jpg",
-    },
-    {
-      name: "Retro Vibes",
-      logo: "https://i.pinimg.com/736x/ae/f5/ab/aef5ab486f2e361248cde0722fe2fcac.jpg",
-    },
-    {
-      name: "Luxury Finds",
-      logo: "https://i.pinimg.com/736x/ae/f5/ab/aef5ab486f2e361248cde0722fe2fcac.jpg",
-    },
-    {
-      name: "Boho Chic",
-      logo: "https://i.pinimg.com/736x/ae/f5/ab/aef5ab486f2e361248cde0722fe2fcac.jpg",
-    },
-  ];
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch Trending This Week
-        const trending = await getTrendingThisWeek();
+        // Fetch Trending This Week using getAllProduct
+        const trending = await getAllProduct(); // Fetch all products without category filter
         setTrendingProducts(
           trending.map((p) => ({
             ...p,
@@ -204,6 +177,7 @@ const Home = () => {
   }, []);
 
   return (
+    // ... rest of the component remains unchanged
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
@@ -266,7 +240,7 @@ const Home = () => {
               Discover the most loved items from our community of sellers
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {loading.trending
               ? Array(4)
                   .fill()
@@ -423,13 +397,10 @@ const Home = () => {
                   <span>Extra 10% off for new customers</span>
                 </div>
               </div>
-              <Link
-                to="/categories"
-               
-              >
-                <button  className="bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 rounded-md text-lg font-medium flex items-center gap-2 transition-colors">
+              <Link to="/categories">
+                <button className="bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 rounded-md text-lg font-medium flex items-center gap-2 transition-colors">
                   Shop Sale Items
-                <ArrowRight className="h-5 w-5" />
+                  <ArrowRight className="h-5 w-5" />
                 </button>
               </Link>
             </div>
@@ -538,38 +509,6 @@ const Home = () => {
               View All Products
               <ArrowRight className="h-4 w-4" />
             </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Brands */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-playfair font-bold mb-4">
-              Featured Brands
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Shop from our trusted seller community
-            </p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
-            {brands.map((brand) => (
-              <Link
-                key={brand.name}
-                to={`/brands/${brand.name.toLowerCase().replace(/\s+/g, "-")}`}
-                className="text-center group cursor-pointer"
-              >
-                <div className="w-20 h-20 rounded-full bg-muted mx-auto mb-3 flex items-center justify-center group-hover:shadow-lg transition-shadow">
-                  <img
-                    src={brand.logo}
-                    alt={brand.name}
-                    className="w-12 h-12 object-contain"
-                  />
-                </div>
-                <p className="text-sm font-medium">{brand.name}</p>
-              </Link>
-            ))}
           </div>
         </div>
       </section>

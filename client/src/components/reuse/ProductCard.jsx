@@ -2,6 +2,7 @@ import { Heart, ShoppingBag, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addItem } from "../../redux/slices/cartSlices";
+import { toast } from "react-toastify";
 
 const ProductCard = ({ product, viewMode = "grid" }) => {
   const dispatch = useDispatch();
@@ -9,18 +10,20 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    dispatch(
-      addItem({
-        id: product._id || product.id,
-        name: product.title || product.name,
-        price: Math.round(product.price || 0),
-        image:
-          product.images?.[0] ||
-          product.image ||
-          "https://via.placeholder.com/150",
-        seller: product.seller?.name || product.seller || "Unknown Seller",
-      })
-    );
+    const item = {
+      id: product._id || product.id,
+      name: product.title || product.name || "Untitled Product",
+      price: Math.round(product.price || 0),
+      image:
+        product.images?.[0] ||
+        product.image ||
+        "https://via.placeholder.com/150",
+      seller:
+        product.seller?.storeName || product.seller?.name || "Unknown Seller",
+      quantity: 1,
+    };
+    dispatch(addItem(item));
+    toast.success(`${item.name} added to cart!`); // Show toast notification
   };
 
   const formattedPrice = new Intl.NumberFormat("en-NG", {
@@ -87,7 +90,10 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
               {product.title || product.name || "Untitled Product"}
             </h3>
             <p className="text-xs text-muted-foreground">
-              by {product.seller?.name || product.seller || "Unknown Seller"}
+              by{" "}
+              {product.seller?.storeName ||
+                product.seller?.name ||
+                "Unknown Seller"}
             </p>
             {product.rating && (
               <div className="flex items-center gap-2">

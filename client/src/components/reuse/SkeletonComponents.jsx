@@ -1,14 +1,14 @@
-export const SkeletonProductCard = ({ viewMode = 'grid' }) => (
+export const SkeletonProductCard = ({ viewMode = "grid" }) => (
   <div
     className={`overflow-hidden rounded-lg bg-card shadow-card animate-pulse ${
-      viewMode === 'list' ? 'flex flex-row' : ''
+      viewMode === "list" ? "flex flex-row" : ""
     }`}
   >
     <div
-      className={`relative ${viewMode === 'list' ? 'w-1/3 h-48' : 'h-64'} bg-muted`}
+      className={`relative ${viewMode === "list" ? "w-1/3 h-48" : "h-64"} bg-muted`}
     />
     <div
-      className={`p-4 ${viewMode === 'list' ? 'flex-1 flex flex-col justify-between' : ''}`}
+      className={`p-4 ${viewMode === "list" ? "flex-1 flex flex-col justify-between" : ""}`}
     >
       <div className="space-y-2">
         <div className="h-4 bg-muted rounded w-3/4" />
@@ -17,7 +17,7 @@ export const SkeletonProductCard = ({ viewMode = 'grid' }) => (
       </div>
       <div
         className={`flex items-center ${
-          viewMode === 'list' ? 'justify-between mt-4' : 'justify-between mt-2'
+          viewMode === "list" ? "justify-between mt-4" : "justify-between mt-2"
         }`}
       >
         <div className="h-4 bg-muted rounded w-20" />
