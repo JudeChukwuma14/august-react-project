@@ -122,15 +122,15 @@ export const getAllProduct = async (category = '') => {
     // Normalize category in response
     const data = Array.isArray(response.data)
       ? response.data.map((p) => ({
-          ...p,
-          category: p.category.toLowerCase() === 'clothes' ? 'clothing' : p.category.toLowerCase(),
-        }))
+        ...p,
+        category: p.category.toLowerCase() === 'clothes' ? 'clothing' : p.category.toLowerCase(),
+      }))
       : response.data.products
-      ? response.data.products.map((p) => ({
+        ? response.data.products.map((p) => ({
           ...p,
           category: p.category.toLowerCase() === 'clothes' ? 'clothing' : p.category.toLowerCase(),
         }))
-      : [];
+        : [];
     return data;
   } catch (error) {
     console.error('getAllProduct error:', error.response?.data || error.message);
@@ -149,15 +149,15 @@ export const getShopByCategory = async (category) => {
     // Normalize category in response
     const data = Array.isArray(response.data)
       ? response.data.map((p) => ({
-          ...p,
-          category: p.category.toLowerCase() === 'clothes' ? 'clothing' : p.category.toLowerCase(),
-        }))
+        ...p,
+        category: p.category.toLowerCase() === 'clothes' ? 'clothing' : p.category.toLowerCase(),
+      }))
       : response.data.products
-      ? response.data.products.map((p) => ({
+        ? response.data.products.map((p) => ({
           ...p,
           category: p.category.toLowerCase() === 'clothes' ? 'clothing' : p.category.toLowerCase(),
         }))
-      : [];
+        : [];
     return data;
   } catch (error) {
     console.error('getShopByCategory error:', error.response?.data || error.message);
@@ -223,5 +223,50 @@ export const getProductById = async (id) => {
   } catch (error) {
     console.error('getProductById error:', error.response?.data || error.message);
     throw new Error(error.response?.data?.message || 'Failed to fetch product details');
+  }
+};
+
+
+
+
+export const addCart = async (productId, quantity, sessionId) => {
+  try {
+    const response = await api.post('/add', { productId, quantity, sessionId: sessionId || null });
+    return response.data;
+  } catch (error) {
+    console.error('Add to cart error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to add to cart');
+  }
+};
+
+export const updateCart = async (productId, quantity, sessionId) => {
+  try {
+    const response = await api.put('/update', { productId, quantity, sessionId });
+    return response.data;
+  } catch (error) {
+    console.error('Update cart error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to update cart');
+  }
+};
+
+export const deleteCartItem = async (productId, sessionId) => {
+  try {
+    const response = await api.delete(`/remove/${productId}`, {
+      params: { sessionId },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Delete cart item error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to remove item from cart');
+  }
+};
+
+export const getCart = async (sessionId) => {
+  try {
+    const response = await api.get('/cart', { params: { sessionId } });
+    return response.data;
+  } catch (error) {
+    console.error('Get cart error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to fetch cart');
   }
 };

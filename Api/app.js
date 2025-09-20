@@ -4,6 +4,8 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const allRouter = require("./router/userRouter");
 const cors = require("cors");
+const cookieParser = require("cookie-parser")
+
 mongoose
   .connect("mongodb://127.0.0.1:27017/unknown")
   .then(() => {
@@ -14,6 +16,7 @@ mongoose
   });
 
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api", allRouter);

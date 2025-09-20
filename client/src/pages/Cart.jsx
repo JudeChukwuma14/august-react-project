@@ -13,6 +13,7 @@ const Cart = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.items);
 
+
   // Calculate total price
   const totalPrice = cartItems.reduce(
     (total, item) => total + item.price * (item.quantity || 1),

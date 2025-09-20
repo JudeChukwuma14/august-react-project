@@ -240,22 +240,24 @@ const Home = () => {
               Discover the most loved items from our community of sellers
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {loading.trending
               ? Array(4)
                   .fill()
                   .map((_, i) => <SkeletonProductCard key={i} />)
               : trendingProducts
-                  .slice(0, 4)
+                  .slice(0, 10)
                   .map((product) => (
                     <ProductCard key={product._id} product={product} />
                   ))}
           </div>
           <div className="text-center mt-12">
-            <button className="border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 px-8 rounded-md text-lg font-medium flex items-center gap-2 mx-auto transition-colors">
-              View All Products
-              <ArrowRight className="h-4 w-4" />
-            </button>
+            <Link to="/shop">
+              <button className="border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 px-8 rounded-md text-lg font-medium flex items-center gap-2 mx-auto transition-colors">
+                View All Products
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -299,12 +301,12 @@ const Home = () => {
               Curated collections for every style and occasion
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-4 gap-6">
             {loading.collections
               ? Array(3)
                   .fill()
                   .map((_, i) => <SkeletonCollectionCard key={i} />)
-              : featuredCollections.slice(0, 3).map((collection) => (
+              : featuredCollections.slice(0, 4).map((collection) => (
                   <Link
                     key={collection.id}
                     to={`/collections/${collection.id}`}

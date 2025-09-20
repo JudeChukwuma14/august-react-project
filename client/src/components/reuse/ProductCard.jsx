@@ -1,29 +1,49 @@
 import { Heart, ShoppingBag, Star } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { addItem } from "../../redux/slices/cartSlices";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import {
+  addItem,
+  setSessionId,
+  setCartStatus,
+} from "../../redux/slices/cartSlices";
+import { addCart } from "../../service/userApi";
 
 const ProductCard = ({ product, viewMode = "grid" }) => {
   const dispatch = useDispatch();
+  const { sessionId, status } = useSelector((state) => state.cart);
 
-  const handleAddToCart = (e) => {
+const handleAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const item = {
-      id: product._id || product.id,
-      name: product.title || product.name || "Untitled Product",
-      price: Math.round(product.price || 0),
-      image:
-        product.images?.[0] ||
-        product.image ||
-        "https://via.placeholder.com/150",
-      seller:
-        product.seller?.storeName || product.seller?.name || "Unknown Seller",
-      quantity: 1,
-    };
-    dispatch(addItem(item));
-    toast.success(`${item.name} added to cart!`); // Show toast notification
+    try {
+      dispatch(setCartStatus({ status: "loading" }));
+      const response = await addCart(product._id || product.id, 1, sessionId);
+
+      const item = {
+        id: product._id || product.id,
+        name: product.title || product.name || "Untitled Product",
+        price: Math.round(product.price || 0),
+        image:
+          product.images?.[0] ||
+          product.image ||
+          "https://via.placeholder.com/150",
+        seller:
+          product.seller?.storeName || product.seller?.name || "Unknown Seller",
+        quantity: 1,
+      };
+
+      if (response.sessionId && !sessionId) {
+        dispatch(setSessionId(response.sessionId));
+      }
+
+      dispatch(addItem(item));
+      toast.success(`${item.name} added to cart!`);
+      dispatch(setCartStatus({ status: "succeeded" }));
+    } catch (error) {
+      toast.error(error.message || "Failed to add to cart");
+      dispatch(setCartStatus({ status: "failed", error: error.message }));
+    }
   };
 
   const formattedPrice = new Intl.NumberFormat("en-NG", {
@@ -131,7 +151,7 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
               onClick={handleAddToCart}
             >
               <ShoppingBag className="h-3 w-3" />
-              Add
+              {status === "loading" ? "Adding..." : "Add"}
             </button>
           </div>
         </div>
