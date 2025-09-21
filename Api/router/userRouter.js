@@ -3,7 +3,8 @@ const { signUp, login, signupSeller, loginSeller } = require('../controller/user
 const { authenticate, restrictToSeller } = require('../middleware/auth');
 const { postProduct, getAllProduct, getTrendingThisWeek, getWhatsHotThisWeek, getFeaturedCollections, getShopByCategory, getSpecialOffers, getStyleInspiration, getSellerProducts, updateProduct, deleteProduct, getProductById } = require('../controller/productController');
 const upload = require('../middleware/multer');
-const { addToCart, updateCart, deleteCartItem, getCart } = require('../controller/cartController');
+const { addToCart, updateCart, deleteCartItem, getCart, syncCart } = require('../controller/cartController');
+const { createOrder } = require('../controller/orderController');
 const router = express.Router();
 
 
@@ -36,5 +37,16 @@ router.post('/add', addToCart);
 router.put('/update', updateCart);
 router.delete('/remove/:productId', deleteCartItem);
 router.get('/cart', getCart);
+router.post('/sync', syncCart);
+
+
+
+router.post('/create-order', createOrder);
+
+
+
+
+
+
 
 module.exports = router;

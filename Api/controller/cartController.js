@@ -242,10 +242,117 @@ const getCart = async (req, res) => {
     }
 };
 
+const syncCart = async (req, res) => {
+    try {
+        let { items, sessionId } = req.body;
+        const userId = req.user?._id || null;
 
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ message: 'Invalid or empty items' });
+        }
+
+        let cart;
+        if (userId) {
+            cart = await Cart.findOne({ userId });
+        } else {
+            if (!sessionId) {
+                sessionId = uuidv4();
+            }
+            cart = await Cart.findOne({ sessionId });
+        }
+
+        // Clear existing items
+        if (cart) {
+            cart.items = [];
+        } else {
+            cart = new Cart({
+                userId: userId || null,
+                sessionId: userId ? null : sessionId,
+                items: [],
+            });
+        }
+
+        let hasPriceChanges = false;
+        // Add and validate each item
+        for (const itemData of items) {
+            const { productId, quantity, price: clientPrice } = itemData;
+            const product = await Product.findById(productId).select('price stock title');
+            if (!product) {
+                return res.status(404).json({ message: `Product ${productId} not found` });
+            }
+            if (product.price !== clientPrice) {
+                console.warn(`Price changed for ${product.title}: ${clientPrice} -> ${product.price}`);
+                hasPriceChanges = true;
+            }
+            if (quantity < 1 || product.stock < quantity) {
+                return res.status(400).json({
+                    message: `Insufficient stock for ${product.title}. Available: ${product.stock}`
+                });
+            }
+            cart.items.push({ productId, quantity, price: product.price });
+        }
+
+        await cart.save();
+
+        // Populate and validate stock
+        const populatedCart = await Cart.findById(cart._id).populate({
+            path: 'items.productId',
+            select: 'title images price category seller stock',
+            populate: { path: 'seller', select: 'storeName' },
+        });
+
+        if (!populatedCart) {
+            return res.status(404).json({ message: 'Cart not found after save' });
+        }
+
+        // Adjust for stock changes
+        let hasChanges = false;
+        for (let i = 0; i < populatedCart.items.length; i++) {
+            const item = populatedCart.items[i];
+            if (item.productId.stock < item.quantity) {
+                const oldQty = item.quantity;
+                item.quantity = item.productId.stock;
+                hasChanges = true;
+                if (item.quantity === 0) {
+                    populatedCart.items.splice(i, 1);
+                    i--;
+                }
+                console.warn(`Adjusted ${item.productId.title}: ${oldQty} -> ${item.quantity}`);
+            }
+        }
+
+        if (hasChanges) {
+            await populatedCart.save();
+        }
+
+        if (populatedCart.items.length === 0) {
+            await Cart.deleteOne({ _id: populatedCart._id });
+            return res.status(200).json({
+                message: 'Cart synced but now empty due to stock',
+                cart: { items: [] },
+                sessionId,
+                hasPriceChanges
+            });
+        }
+
+        const message = hasPriceChanges
+            ? 'Cart synced with price updates'
+            : 'Cart synced successfully';
+
+        return res.status(200).json({
+            message,
+            cart: populatedCart,
+            sessionId,
+            hasPriceChanges
+        });
+    } catch (error) {
+        handleError(res, error);
+    }
+};
 module.exports = {
     addToCart,
     updateCart,
     deleteCartItem,
-    getCart
+    getCart,
+    syncCart
 }

@@ -1,51 +1,43 @@
+// components/ProductCard.js
 import { Heart, ShoppingBag, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import {
-  addItem,
-  setSessionId,
-  setCartStatus,
-} from "../../redux/slices/cartSlices";
-import { addCart } from "../../service/userApi";
+import { addItem, setCartStatus } from "../../redux/slices/cartSlices";
 
 const ProductCard = ({ product, viewMode = "grid" }) => {
   const dispatch = useDispatch();
-  const { sessionId, status } = useSelector((state) => state.cart);
+  const { status } = useSelector((state) => state.cart);
 
-const handleAddToCart = async (e) => {
+  const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    try {
-      dispatch(setCartStatus({ status: "loading" }));
-      const response = await addCart(product._id || product.id, 1, sessionId);
+    if (status === "loading") return;
 
-      const item = {
-        id: product._id || product.id,
-        name: product.title || product.name || "Untitled Product",
-        price: Math.round(product.price || 0),
-        image:
-          product.images?.[0] ||
-          product.image ||
-          "https://via.placeholder.com/150",
-        seller:
-          product.seller?.storeName || product.seller?.name || "Unknown Seller",
-        quantity: 1,
-      };
+    const item = {
+      productId: product._id || product.id,
+      name: product.title || product.name || "Untitled Product",
+      price: Math.round(product.price || 0),
+      image:
+        product.images?.[0] ||
+        product.image ||
+        "https://via.placeholder.com/150",
+      seller:
+        product.seller?.storeName || product.seller?.name || "Unknown Seller",
+      quantity: 1,
+    };
 
-      if (response.sessionId && !sessionId) {
-        dispatch(setSessionId(response.sessionId));
-      }
+    dispatch(setCartStatus({ status: "loading" }));
+    dispatch(addItem(item));
+    toast.success(`${item.name} added to cart!`);
 
-      dispatch(addItem(item));
-      toast.success(`${item.name} added to cart!`);
+    // Reset status after a short delay
+    setTimeout(() => {
       dispatch(setCartStatus({ status: "succeeded" }));
-    } catch (error) {
-      toast.error(error.message || "Failed to add to cart");
-      dispatch(setCartStatus({ status: "failed", error: error.message }));
-    }
+    }, 500);
   };
 
+  // Price formatting
   const formattedPrice = new Intl.NumberFormat("en-NG", {
     style: "decimal",
     minimumFractionDigits: 0,
@@ -67,6 +59,7 @@ const handleAddToCart = async (e) => {
           viewMode === "list" ? "flex flex-row" : ""
         }`}
       >
+        {/* Product image */}
         <div
           className={`relative overflow-hidden ${
             viewMode === "list" ? "w-1/3 h-48" : "h-64"
@@ -81,6 +74,8 @@ const handleAddToCart = async (e) => {
             alt={product.title || product.name || "Product"}
             className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
           />
+
+          {/* Product badges */}
           <div className="absolute top-3 left-3 flex gap-2">
             {product.isNew && (
               <span className="bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs font-medium">
@@ -93,13 +88,21 @@ const handleAddToCart = async (e) => {
               </span>
             )}
           </div>
+
+          {/* Wishlist button */}
           <button
             className="absolute top-3 right-3 h-8 w-8 bg-background/80 hover:bg-background rounded-md flex items-center justify-center transition-colors"
-            onClick={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              // Add to wishlist functionality would go here
+              toast.info("Added to wishlist");
+            }}
           >
             <Heart className="h-4 w-4" />
           </button>
         </div>
+
+        {/* Product details */}
         <div
           className={`p-4 ${
             viewMode === "list" ? "flex-1 flex flex-col justify-between" : ""
@@ -115,6 +118,8 @@ const handleAddToCart = async (e) => {
                 product.seller?.name ||
                 "Unknown Seller"}
             </p>
+
+            {/* Product rating */}
             {product.rating && (
               <div className="flex items-center gap-2">
                 <div className="flex gap-1">
@@ -131,6 +136,8 @@ const handleAddToCart = async (e) => {
               </div>
             )}
           </div>
+
+          {/* Price and add to cart */}
           <div
             className={`flex items-center ${
               viewMode === "list"
@@ -147,11 +154,13 @@ const handleAddToCart = async (e) => {
               )}
             </div>
             <button
-              className="h-8 bg-primary text-primary-foreground hover:bg-primary/90 px-3 rounded-md text-sm font-medium flex items-center gap-1 transition-colors"
+              className="h-8 bg-primary text-primary-foreground hover:bg-primary/90 px-3 rounded-md text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50"
               onClick={handleAddToCart}
+              // disabled={status === "loading"}
             >
               <ShoppingBag className="h-3 w-3" />
-              {status === "loading" ? "Adding..." : "Add"}
+              {/* {status === "loading" ? "Adding..." : "Add"} */}
+              Add
             </button>
           </div>
         </div>

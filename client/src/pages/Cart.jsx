@@ -1,24 +1,38 @@
-import React from "react";
+// pages/Cart.js
+import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   removeItem,
   decreaseQuantity,
   addItem,
+  syncCartToBackend,
 } from "../redux/slices/cartSlices";
 import { ShoppingBag, Trash2, Plus, Minus } from "lucide-react";
 import { toast } from "react-toastify";
 
 const Cart = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const cartItems = useSelector((state) => state.cart.items);
-
+  const { status } = useSelector((state) => state.cart);
+  const user = useSelector((state) => state.user.user);
+  const seller = useSelector((state) => state.seller.seller);
+  const isAuthenticated = !!user || !!seller;
 
   // Calculate total price
   const totalPrice = cartItems.reduce(
     (total, item) => total + item.price * (item.quantity || 1),
     0
   );
+
+  // Redirect to login if cart has items but user is not authenticated
+  useEffect(() => {
+    if (cartItems.length > 0 && !isAuthenticated) {
+      toast.info("Please log in to proceed to checkout");
+      navigate("/selectpath");
+    }
+  }, [cartItems.length, isAuthenticated, navigate]);
 
   // Format price in NGN
   const formatPrice = (price) =>
@@ -32,7 +46,7 @@ const Cart = () => {
   const handleIncreaseQuantity = (item) => {
     dispatch(
       addItem({
-        id: item.id,
+        productId: item.productId,
         name: item.name,
         price: item.price,
         image: item.image,
@@ -43,15 +57,37 @@ const Cart = () => {
   };
 
   // Handle decreasing quantity
-  const handleDecreaseQuantity = (itemId, itemName) => {
-    dispatch(decreaseQuantity(itemId));
+  const handleDecreaseQuantity = (productId, itemName) => {
+    dispatch(decreaseQuantity(productId));
     toast.success(`Decreased quantity for ${itemName}`);
   };
 
   // Handle removing item
-  const handleRemoveItem = (itemId, itemName) => {
-    dispatch(removeItem(itemId));
+  const handleRemoveItem = (productId, itemName) => {
+    dispatch(removeItem(productId));
     toast.success(`${itemName} removed from cart`);
+  };
+
+  // Handle proceeding to checkout
+  const handleProceedToCheckout = () => {
+    if (status === "loading") return;
+
+    // Check authentication
+    if (!isAuthenticated) {
+      toast.info("Please log in to proceed to checkout");
+      navigate("/selectpath");
+      return;
+    }
+
+    // Sync cart to backend before checkout
+    dispatch(syncCartToBackend())
+      .unwrap()
+      .then(() => {
+        navigate("/checkout");
+      })
+      .catch((error) => {
+        toast.error(`Sync failed: ${error}`);
+      });
   };
 
   return (
@@ -81,7 +117,7 @@ const Cart = () => {
               <div className="bg-white shadow-card rounded-lg overflow-hidden">
                 {cartItems.map((item) => (
                   <div
-                    key={item.id}
+                    key={item.productId}
                     className="flex items-center border-b border-gray-200 p-4 last:border-b-0"
                   >
                     {/* Item Image */}
@@ -92,18 +128,23 @@ const Cart = () => {
                         className="w-full h-full object-cover rounded-md"
                       />
                     </div>
+
                     {/* Item Details */}
                     <div className="flex-1 ml-4">
                       <h3 className="text-lg font-medium">{item.name}</h3>
                       <p className="text-sm font-semibold mt-1">
                         ₦{formatPrice(item.price)}
                       </p>
+                      <p className="text-xs text-muted-foreground">
+                        Seller: {item.seller}
+                      </p>
                     </div>
+
                     {/* Quantity Controls */}
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() =>
-                          handleDecreaseQuantity(item.id, item.name)
+                          handleDecreaseQuantity(item.productId, item.name)
                         }
                         className="h-8 w-8 flex items-center justify-center bg-gray-200 rounded-full hover:bg-gray-300 transition-colors"
                         aria-label={`Decrease quantity of ${item.name}`}
@@ -121,9 +162,12 @@ const Cart = () => {
                         <Plus className="h-4 w-4" />
                       </button>
                     </div>
+
                     {/* Remove Button */}
                     <button
-                      onClick={() => handleRemoveItem(item.id, item.name)}
+                      onClick={() =>
+                        handleRemoveItem(item.productId, item.name)
+                      }
                       className="ml-4 text-red-500 hover:text-red-600 transition-colors"
                       aria-label={`Remove ${item.name} from cart`}
                     >
@@ -154,14 +198,18 @@ const Cart = () => {
                     </div>
                   </div>
                 </div>
-                <Link to={"/checkout"}>
-                  <button
-                    className="w-full mt-6 bg-[#36d7b7] text-white py-3 rounded-md text-sm font-medium hover:bg-[#2abca0] transition-colors disabled:bg-gray-400"
-                    disabled={cartItems.length === 0}
-                  >
-                    Proceed to Checkout
-                  </button>
-                </Link>
+
+                {/* Checkout Button */}
+                <button
+                  onClick={handleProceedToCheckout}
+                  className="w-full mt-6 bg-[#36d7b7] text-white py-3 rounded-md text-sm font-medium hover:bg-[#2abca0] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  disabled={cartItems.length === 0 || status === "loading"}
+                >
+                  {status === "loading"
+                    ? "Syncing Cart..."
+                    : "Proceed to Checkout"}
+                </button>
+
                 <Link
                   to="/shop"
                   className="block text-center mt-4 text-[#36d7b7] hover:underline"
