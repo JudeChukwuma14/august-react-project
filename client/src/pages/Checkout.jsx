@@ -17,6 +17,7 @@ const Checkout = () => {
   const cartItems = useSelector((state) => state.cart.items);
   const { status, sessionId } = useSelector((state) => state.cart);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("card"); // Default payment method
 
   // Get user information for pre-filling form if available
   const user = useSelector((state) => state.user.user);
@@ -91,23 +92,32 @@ const Checkout = () => {
           price: item.price,
         })),
         totalAmount: totalPrice,
-        paymentMethod: data.paymentMethod,
+        paymentMethod: paymentMethod, // Use the selected payment method
         sessionId,
       };
 
       // Step 3: Create order
       const response = await createOrder(orderData);
-      toast.success(`Order placed successfully! Order ID: ${response.orderId}`);
 
-      // Clear cart and redirect
-      dispatch(clearCart());
-      navigate("/order-confirmation", {
-        state: {
-          orderId: response.orderId,
-          orderTotal: totalPrice,
-          shippingInfo: data,
-        },
-      });
+      if (response.paymentRequired) {
+        // Redirect to Paystack for payment
+        window.location.href = response.authorizationUrl;
+      } else {
+        // For pay on delivery, show success immediately
+        toast.success(
+          `Order placed successfully! Order ID: ${response.orderId}`
+        );
+
+        // Clear cart and redirect
+        dispatch(clearCart());
+        navigate("/order-confirmation", {
+          state: {
+            orderId: response.orderId,
+            orderTotal: totalPrice,
+            shippingInfo: data,
+          },
+        });
+      }
     } catch (error) {
       console.error("Order submission error:", error);
       toast.error(error.message || "Failed to place order. Please try again.");
@@ -391,6 +401,84 @@ const Checkout = () => {
                         {errors.city.message}
                       </p>
                     )}
+                  </div>
+                </div>
+
+                {/* Payment Method Selection */}
+                <div className="pt-4 border-t border-gray-200">
+                  <h3 className="text-lg font-medium mb-4">Payment Method</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div
+                      className={`border rounded-md p-4 cursor-pointer transition-all ${
+                        paymentMethod === "card"
+                          ? "border-[#36d7b7] bg-[#36d7b7]/10"
+                          : "border-gray-300 hover:border-gray-400"
+                      }`}
+                      onClick={() => setPaymentMethod("card")}
+                    >
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          checked={paymentMethod === "card"}
+                          onChange={() => setPaymentMethod("card")}
+                          className="h-4 w-4 text-[#36d7b7] focus:ring-[#36d7b7]"
+                        />
+                        <label className="ml-2 block text-sm font-medium text-gray-700">
+                          Card Payment
+                        </label>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Pay securely with card
+                      </p>
+                    </div>
+
+                    <div
+                      className={`border rounded-md p-4 cursor-pointer transition-all ${
+                        paymentMethod === "bank_transfer"
+                          ? "border-[#36d7b7] bg-[#36d7b7]/10"
+                          : "border-gray-300 hover:border-gray-400"
+                      }`}
+                      onClick={() => setPaymentMethod("bank_transfer")}
+                    >
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          checked={paymentMethod === "bank_transfer"}
+                          onChange={() => setPaymentMethod("bank_transfer")}
+                          className="h-4 w-4 text-[#36d7b7] focus:ring-[#36d7b7]"
+                        />
+                        <label className="ml-2 block text-sm font-medium text-gray-700">
+                          Bank Transfer
+                        </label>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Transfer directly from your bank
+                      </p>
+                    </div>
+
+                    <div
+                      className={`border rounded-md p-4 cursor-pointer transition-all ${
+                        paymentMethod === "pay_on_delivery"
+                          ? "border-[#36d7b7] bg-[#36d7b7]/10"
+                          : "border-gray-300 hover:border-gray-400"
+                      }`}
+                      onClick={() => setPaymentMethod("pay_on_delivery")}
+                    >
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          checked={paymentMethod === "pay_on_delivery"}
+                          onChange={() => setPaymentMethod("pay_on_delivery")}
+                          className="h-4 w-4 text-[#36d7b7] focus:ring-[#36d7b7]"
+                        />
+                        <label className="ml-2 block text-sm font-medium text-gray-700">
+                          Pay on Delivery
+                        </label>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Pay when your order arrives
+                      </p>
+                    </div>
                   </div>
                 </div>
 

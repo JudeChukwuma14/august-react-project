@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "busboy": "^1.6.0",
     "cloudinary": "^2.7.0",
@@ -22,6 +23,7 @@
     "mongoose": "^8.17.2",
     "multer": "^2.0.2",
     "nodemon": "^3.1.10",
-    "uuid": "^13.0.0"
+    "paystack": "^2.0.1",
+    "uuid": "^8.3.2"
   }
 }

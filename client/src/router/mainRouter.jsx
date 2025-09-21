@@ -21,6 +21,9 @@ const Cart = lazy(() => import("../pages/Cart"));
 const Dashboard = lazy(() => import("../Seller/pages/Dashboard"));
 const ProductFrom = lazy(() => import("../Seller/pages/ProductForm"));
 const ProductList = lazy(() => import("../Seller/pages/ProductList"));
+const PaymentVerification = lazy(() => import("../pages/PaymentVerification"));
+const OrderConfirmation = lazy(() => import("../pages/OrderConfirmation"));
+
 const withSuspense = (Component) => (
   <Suspense fallback={<Spinner />}>
     <Component />
@@ -56,7 +59,9 @@ const rotuerConfig = [
         path: "product/:id",
         element: withSuspense(ProductDetails),
       },
-      { path: "/cart", element: withSuspense(Cart) }
+      { path: "/cart", element: withSuspense(Cart) },
+      // In your App.js or routing file
+      { path: "/order-confirmation", element: withSuspense(OrderConfirmation) },
     ],
   },
   {
@@ -88,6 +93,8 @@ const rotuerConfig = [
   { path: "/seller-signup", element: withSuspense(SignupSeller) },
   { path: "/seller-login", element: withSuspense(LoginSeller) },
   { path: "/selectpath", element: withSuspense(Selectpath) },
+  { path: "/payment-success", element: withSuspense(PaymentVerification) },
+  { path: "/payment-verify", element: withSuspense(PaymentVerification) },
 ];
 
 export const mainRouter = createBrowserRouter(rotuerConfig);

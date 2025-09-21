@@ -115,3 +115,26 @@ export const createOrder = async (orderData) => {
     throw new Error(error.response?.data?.message || 'Failed to create order');
   }
 };
+
+// service/cartApi.js
+export const verifyPayment = async (reference, orderId) => {
+  try {
+    const response = await api.get(
+      `/verify-payment-handler?reference=${encodeURIComponent(reference)}&orderId=${encodeURIComponent(orderId)}`
+    )
+    return response.data;
+  } catch (error) {
+    console.error('Verify payment error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to verify payment');
+  }
+}; 
+
+export const confirmOrderDelivery = async (orderId) => {
+  try {
+    const response = await api.post(`/${orderId}/confirm-delivery`);
+    return response.data;
+  } catch (error) {
+    console.error('Confirm delivery error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to confirm delivery');
+  }
+};
