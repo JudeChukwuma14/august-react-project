@@ -1,12 +1,14 @@
-// pages/PaymentVerification.js
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { verifyPayment } from "../service/cartApi";
+import { useDispatch } from "react-redux";
+import { clearCart } from "../redux/slices/cartSlices"; // Import clearCart action
 
 const PaymentVerification = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [status, setStatus] = useState("verifying");
   const [order, setOrder] = useState(null);
 
@@ -32,12 +34,22 @@ const PaymentVerification = () => {
           setStatus("success");
           toast.success("Payment verified successfully!");
 
-          // Redirect to order confirmation
+          // Clear cart from Redux store
+          dispatch(clearCart());
+
+          // Get the full order details with shipping info
+          const orderDetails = response.order;
+          
+          // Redirect to order confirmation with ALL order data
           setTimeout(() => {
             navigate("/order-confirmation", {
               state: {
-                orderId: response.order._id,
-                orderTotal: response.order.totalAmount,
+                orderId: orderDetails._id,
+                orderTotal: orderDetails.totalAmount,
+                shippingInfo: orderDetails.shippingInfo, // Pass shipping info
+                paymentStatus: orderDetails.paymentStatus,
+                items: orderDetails.items,
+                createdAt: orderDetails.createdAt
               },
             });
           }, 2000);
@@ -53,7 +65,7 @@ const PaymentVerification = () => {
     };
 
     verify();
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, dispatch]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -73,7 +85,7 @@ const PaymentVerification = () => {
             <div className="text-green-500 text-6xl mb-6">✓</div>
             <h2 className="text-2xl font-semibold mb-4">Payment Successful!</h2>
             <p className="text-gray-600 mb-6">
-              Redirecting to order confirmation...
+              Your cart has been cleared and we're redirecting you to order confirmation...
             </p>
             {order && (
               <div className="bg-gray-50 p-4 rounded-md text-left">

@@ -31,35 +31,6 @@ const signUp = async (req, res) => {
   }
 };
 
-const login = async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "user not found" });
-    }
-
-    const isMacth = await bcrypt.compareSync(password, user.password);
-    if (!isMacth) {
-      return res.status(400).json({ message: "Invaild credentials" });
-    }
-
-    const token = jwt.sign({ id: user._id, role: "user" }, process.env.JWT, {
-      expiresIn: "1h",
-    });
-
-    res.cookie("AUGUSTREACT", token, { httpOnly: true, maxAge: 8600000 });
-    res.status(200).json({
-      data: { username: user.username, email: user.email },
-      token,
-      message: "Login successful",
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Internal Server Error", error: error.message });
-  }
-};
 
 const signupSeller = async (req, res) => {
   try {
@@ -99,45 +70,129 @@ const signupSeller = async (req, res) => {
   }
 };
 
+// User Login
+const login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, role: "user" },
+      process.env.JWT_SECRET || process.env.JWT,
+      { expiresIn: "1h" }
+    );
+
+    // Set httpOnly cookie for production, send token for development
+    if (process.env.NODE_ENV === 'production') {
+      res.cookie('authToken', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 3600000, // 1 hour
+      });
+
+      res.status(200).json({
+        data: {
+          username: user.username,
+          email: user.email,
+          _id: user._id
+        },
+        message: "Login successful",
+      });
+    } else {
+      // Development - send token in response
+      res.status(200).json({
+        data: {
+          username: user.username,
+          email: user.email,
+          _id: user._id
+        },
+        token,
+        message: "Login successful",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
+
 const loginSeller = async (req, res) => {
   const { email, password } = req.body;
   try {
     const seller = await Seller.findOne({ email });
     if (!seller) {
-      return res.status(400).json({ message: "seller not found" });
+      return res.status(400).json({ message: "Seller not found" });
     }
 
-    const isMacth = await bcrypt.compareSync(password, seller.password);
-    if (!isMacth) {
-      return res.status(400).json({ message: "Invaild credentials" });
+    const isMatch = await bcrypt.compare(password, seller.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
     const token = jwt.sign(
       { id: seller._id, role: "seller" },
-      process.env.JWT,
+      process.env.JWT_SECRET || process.env.JWT,
       { expiresIn: "1h" }
     );
 
-    res.cookie("AUGUSTREACT", token, { httpOnly: true, maxAge: 8600000 });
-    res.status(200).json({
-      data: {
-        storeName: seller.storeName,
-        email: seller.email,
-        phoneNumber: seller.phoneNumber,
-        categories: seller.categories,
-        address: seller.address,
-      },
-      token,
-      message: `Welcome ${seller.storeName}`,
-    });
+    // Set httpOnly cookie for production, send token for development
+    if (process.env.NODE_ENV === 'production') {
+      res.cookie('authToken', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 3600000, // 1 hour
+      });
+
+      res.status(200).json({
+        data: {
+          storeName: seller.storeName,
+          email: seller.email,
+          phoneNumber: seller.phoneNumber,
+          categories: seller.categories,
+          address: seller.address,
+          _id: seller._id
+        },
+        message: `Welcome ${seller.storeName}`,
+      });
+    } else {
+      // Development - send token in response
+      res.status(200).json({
+        data: {
+          storeName: seller.storeName,
+          email: seller.email,
+          phoneNumber: seller.phoneNumber,
+          categories: seller.categories,
+          address: seller.address,
+          _id: seller._id
+        },
+        token,
+        message: `Welcome ${seller.storeName}`,
+      });
+    }
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Internal Server Error", error: error.message });
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 };
 
-
+// Logout (clears cookie)
+const logout = (req, res) => {
+  res.clearCookie('authToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });
+  res.status(200).json({ message: "Logged out successfully" });
+};
 
 
 module.exports = {

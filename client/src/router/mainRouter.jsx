@@ -55,13 +55,13 @@ const rotuerConfig = [
         path: "shop",
         element: withSuspense(Shop),
       },
+      { path: "/cart", element: withSuspense(Cart) },
+      // In your App.js or routing file
+      { path: "/order-confirmation", element: withSuspense(OrderConfirmation) },
       {
         path: "product/:id",
         element: withSuspense(ProductDetails),
       },
-      { path: "/cart", element: withSuspense(Cart) },
-      // In your App.js or routing file
-      { path: "/order-confirmation", element: withSuspense(OrderConfirmation) },
     ],
   },
   {

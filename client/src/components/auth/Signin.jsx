@@ -7,6 +7,7 @@ import { LoginUser } from "../../service/userApi";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { setUserLogin } from "../../redux/slices/userSlices";
+
 const Signin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,17 +23,37 @@ const Signin = () => {
     setIsLoading(true);
     try {
       const response = await LoginUser(data);
-      console.log("User created successfully:", response);
-      dispatch(setUserLogin({ user: response.data, token: response.token }));
+      console.log("User login successful:", response);
+
+      // For development, store token in localStorage and Redux
+      if (response.token) {
+        localStorage.setItem("authToken", response.token);
+        dispatch(
+          setUserLogin({
+            user: response.data,
+            token: response.token,
+          })
+        );
+      } else {
+        // For production, just store user data (token is in httpOnly cookie)
+        dispatch(
+          setUserLogin({
+            user: response.data,
+            token: null,
+          })
+        );
+      }
+
       toast.success(response.message || "Login successfully");
       navigate("/");
     } catch (error) {
       toast.error(error.message);
-      console.error("Signup error:", error);
+      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
   };
+
   return (
     <section className="flex flex-col w-full h-screen lg:pl-[500px] items-center justify-center">
       <Sliding />

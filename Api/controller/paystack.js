@@ -2,17 +2,13 @@
 const Order = require("../models/orderModel");
 const Product = require("../models/productModel");
 const Seller = require("../models/sellerModel");
+const Cart = require("../models/cart")
 const axios = require("axios"); 
 
 
 // 1. Initialize Transaction - USING AXIOS INSTEAD
 const initializeTransaction = async (orderTotal, email, orderId, origin) => {
   try {
-    console.log("Initializing Paystack transaction:", {
-      orderTotal,
-      email,
-      orderId,
-    });
 
     const amount = Math.round(orderTotal * 100); // Convert to kobo
     if (amount < 100) {
@@ -36,7 +32,6 @@ const initializeTransaction = async (orderTotal, email, orderId, origin) => {
       },
     };
 
-    console.log("Paystack request payload:", payload);
 
     const response = await axios.post(
       "https://api.paystack.co/transaction/initialize",
@@ -48,8 +43,6 @@ const initializeTransaction = async (orderTotal, email, orderId, origin) => {
         },
       }
     );
-
-    console.log("Paystack response:", response.data);
 
     if (!response.data.status) {
       throw new Error(
@@ -69,10 +62,8 @@ const initializeTransaction = async (orderTotal, email, orderId, origin) => {
   }
 };
 
-// 2. Verify Transaction - USING AXIOS
 const verifyTransaction = async (reference, orderId) => {
   try {
-    console.log("Verifying transaction:", reference);
 
     const response = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
@@ -83,7 +74,6 @@ const verifyTransaction = async (reference, orderId) => {
       }
     );
 
-    console.log("Verification response:", response.data);
 
     if (!response.data.status || response.data.data.status !== "success") {
       throw new Error(
@@ -97,16 +87,16 @@ const verifyTransaction = async (reference, orderId) => {
     if (order.paystackReference !== reference)
       throw new Error("Reference mismatch");
 
-    // Update to hold status & reduce stock
+    // Update to hold status
     order.paymentStatus = "hold";
     order.paymentConfirmedAt = new Date();
     await order.save();
 
-    // Reduce stock for all items
-    for (const item of order.items) {
-      await Product.findByIdAndUpdate(item.productId, {
-        $inc: { stock: -item.quantity },
-      });
+    // Clear cart after successful payment verification
+    if (order.userId) {
+      await Cart.findOneAndDelete({ userId: order.userId });
+    } else if (order.sessionId) {
+      await Cart.findOneAndDelete({ sessionId: order.sessionId });
     }
 
     return order;
@@ -117,6 +107,7 @@ const verifyTransaction = async (reference, orderId) => {
     );
   }
 };
+
 
 // 3. Transfer to Seller (After Order Confirmation) - USING AXIOS
 const transferToSeller = async (order, sellerId, amount, orderId) => {

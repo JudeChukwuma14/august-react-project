@@ -1,6 +1,6 @@
 // service/cartApi.js
-import axios from "axios";
 import { v4 as uuidv4 } from 'uuid';
+import axios from "axios";
 
 const API_URL = "http://localhost:3000/api";
 
@@ -10,31 +10,58 @@ export const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Important for cookies
 });
 
 // Get authentication token from storage
 const getAuthToken = () => {
-  // Check localStorage first (common practice)
-  const tokenFromStorage = localStorage.getItem('authToken');
-  if (tokenFromStorage) return tokenFromStorage;
-  
-  // Check cookies as fallback
-  const cookieToken = document.cookie
-    .split('; ')
-    .find(row => row.startsWith('AUGUSTREACT='))
-    ?.split('=')[1];
-    
-  return cookieToken || null;
+  if (typeof window !== 'undefined') {
+    // For development - check localStorage
+    if (process.env.NODE_ENV === 'development') {
+      const tokenFromStorage = localStorage.getItem('authToken');
+      if (tokenFromStorage) {
+        console.log('Token found in localStorage (development)');
+        return tokenFromStorage;
+      }
+    }
+    console.log('No token found, using httpOnly cookies (production)');
+    return null;
+  }
+  return null;
 };
 
-// Add token to all requests automatically
+// Add token to all requests automatically (for development)
 api.interceptors.request.use((config) => {
   const token = getAuthToken();
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log('Authorization header set with token for URL:', config.url);
+  } else {
+    console.log('No token in header, using httpOnly cookies for:', config.url);
   }
+  
   return config;
+}, (error) => {
+  return Promise.reject(error);
 });
+
+// Add response interceptor to handle auth errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.log('Authentication error, clearing tokens');
+      // Clear tokens from localStorage
+      localStorage.removeItem('authToken');
+      sessionStorage.removeItem('authToken');
+      // You might want to dispatch a logout action here
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 
 // Generate or retrieve session ID for guest users
 export const getSessionId = () => {
