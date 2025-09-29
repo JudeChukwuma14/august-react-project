@@ -1,102 +1,119 @@
-import {
-  DollarSign,
-  ShoppingBagIcon,
-  ShoppingCartIcon,
-  TrendingDownIcon,
-  TrendingUpIcon,
-  User,
-} from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { 
+  DollarSign, 
+  ShoppingBag, 
+  Package, 
+  TrendingUp, 
+  TrendingDown,
+  Users
+} from 'lucide-react';
+import { getSellerStats, getSellerOrders, getTopSellingProducts } from '../../service/sellerApi';
+import { toast } from 'react-toastify';
 
 const Dashboard = () => {
-  const stats = [
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    totalOrders: 0,
+    pendingOrders: 0,
+    completedOrders: 0,
+    totalRevenue: 0,
+    pendingRevenue: 0
+  });
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const [statsResponse, ordersResponse, productsResponse] = await Promise.all([
+        getSellerStats(),
+        getSellerOrders({ limit: 5 }),
+        getTopSellingProducts()
+      ]);
+      
+      setStats(statsResponse.data);
+      setRecentOrders(ordersResponse.orders || []);
+      setTopProducts(productsResponse.products || []);
+    } catch (error) {
+      toast.error('Failed to load dashboard data');
+      console.error('Dashboard error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Format price in NGN
+  const formatPrice = (price) => 
+    new Intl.NumberFormat('en-NG', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(Math.round(price || 0));
+
+  // Mock stats for trends (you can replace with real data later)
+  const dashboardStats = [
     {
       name: "Total Products",
-      value: "120",
-      icon: ShoppingBagIcon,
-      change: "+5%",
-      trend: TrendingUpIcon,
+      value: stats.totalProducts,
+      icon: Package,
+      change: "+12%",
+      trend: TrendingUp
     },
     {
       name: "Total Orders",
-      value: "450",
-      icon: ShoppingCartIcon,
-      change: "+12%",
-      trend: TrendingUpIcon,
-    },
-    {
-      name: "Revenue",
-      value: "$24,500",
-      icon: DollarSign,
+      value: stats.totalOrders,
+      icon: ShoppingBag,
       change: "+8%",
-      trend: TrendingUpIcon,
+      trend: TrendingUp
     },
     {
-      name: "Customers",
-      value: "2,340",
-      icon: User,
-      change: "-3%",
-      trend: TrendingDownIcon,
+      name: "Pending Orders",
+      value: stats.pendingOrders,
+      icon: Users,
+      change: "+5%",
+      trend: TrendingUp
     },
+    {
+      name: "Total Revenue",
+      value: `₦${formatPrice(stats.totalRevenue)}`,
+      icon: DollarSign,
+      change: "+15%",
+      trend: TrendingUp
+    }
   ];
 
-  const recentOrders = [
-    {
-      id: "#ORD-001",
-      customer: "John Doe",
-      date: "2023-04-12",
-      status: "Delivered",
-      amount: "$125.00",
-    },
-    {
-      id: "#ORD-002",
-      customer: "Jane Smith",
-      date: "2023-04-11",
-      status: "Processing",
-      amount: "$85.50",
-    },
-    {
-      id: "#ORD-003",
-      customer: "Robert Johnson",
-      date: "2023-04-10",
-      status: "Shipped",
-      amount: "$210.75",
-    },
-    {
-      id: "#ORD-004",
-      customer: "Emily Davis",
-      date: "2023-04-09",
-      status: "Pending",
-      amount: "$65.25",
-    },
-    {
-      id: "#ORD-005",
-      customer: "Michael Brown",
-      date: "2023-04-08",
-      status: "Delivered",
-      amount: "$145.00",
-    },
-  ];
-
-  const topProducts = [
-    { name: "Vitamin D3 Supplement", sales: 120, revenue: "$3,600" },
-    { name: "Protein Powder", sales: 95, revenue: "$4,750" },
-    { name: "Omega-3 Fish Oil", sales: 85, revenue: "$2,550" },
-    { name: "Probiotic Complex", sales: 78, revenue: "$2,340" },
-    { name: "Magnesium Citrate", sales: 65, revenue: "$1,950" },
-  ];
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="bg-gray-200 h-32 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div>
+    <div className="p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
         <p className="text-gray-600">
-          Welcome to your supplement store admin dashboard
+          Welcome to your Fashion Hub store Seller Dashboard
         </p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {stats.map((stat) => (
+        {dashboardStats.map((stat) => (
           <div key={stat.name} className="bg-white rounded-lg shadow p-5">
             <div className="flex justify-between">
               <div>
@@ -140,57 +157,63 @@ const Dashboard = () => {
             </h2>
           </div>
           <div className="p-3">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Order ID
-                    </th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Customer
-                    </th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {recentOrders.map((order) => (
-                    <tr key={order.id}>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-[#2196F3]">
-                        {order.id}
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {order.customer}
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm">
-                        <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${
-                              order.status === "Delivered"
-                                ? "bg-green-100 text-green-800"
-                                : order.status === "Processing"
-                                ? "bg-blue-100 text-blue-800"
-                                : order.status === "Shipped"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-gray-100 text-gray-800"
-                            }`}
-                        >
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {order.amount}
-                      </td>
+            {recentOrders.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No orders yet
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Order ID
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Customer
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {recentOrders.map((order) => (
+                      <tr key={order._id}>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-[#2196F3]">
+                          #{order._id.slice(-8).toUpperCase()}
+                        </td>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {order.shippingInfo?.firstName} {order.shippingInfo?.lastName}
+                        </td>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm">
+                          <span
+                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                              ${
+                                order.paymentStatus === "paid"
+                                  ? "bg-green-100 text-green-800"
+                                  : order.paymentStatus === "hold"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : order.paymentStatus === "failed"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
+                          >
+                            {order.paymentStatus?.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                          ₦{formatPrice(order.totalAmount)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
 
@@ -202,38 +225,44 @@ const Dashboard = () => {
             </h2>
           </div>
           <div className="p-3">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Product
-                    </th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Sales
-                    </th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Revenue
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {topProducts.map((product) => (
-                    <tr key={product.name}>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {product.name}
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {product.sales} units
-                      </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {product.revenue}
-                      </td>
+            {topProducts.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No products sold yet
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Product
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Sales
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Revenue
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {topProducts.map((product) => (
+                      <tr key={product._id}>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {product.name}
+                        </td>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {product.totalSold} units
+                        </td>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                          ₦{formatPrice(product.totalRevenue)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -241,4 +270,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Dashboard; 

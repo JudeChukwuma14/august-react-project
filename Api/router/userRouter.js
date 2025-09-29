@@ -4,9 +4,9 @@ const { authenticate, restrictToSeller, requireUserOrGuestWithSession, requireAu
 const { postProduct, getAllProduct, getTrendingThisWeek, getWhatsHotThisWeek, getFeaturedCollections, getShopByCategory, getSpecialOffers, getStyleInspiration, getSellerProducts, updateProduct, deleteProduct, getProductById } = require('../controller/productController');
 const upload = require('../middleware/multer');
 const { addToCart, updateCart, deleteCartItem, getCart, syncCart } = require('../controller/cartController');
-const { createOrderAndInitializePayment, verifyPaymentWebhook, confirmOrderDelivery, verifyPaymentManual } = require('../controller/orderController');
+const { createOrderAndInitializePayment, verifyPaymentWebhook, confirmOrderDelivery, verifyPaymentManual, getOrders, getOrderDetails } = require('../controller/orderController');
 const router = express.Router();
-
+const sellerRoutes = require("./sellerRouter")
 // Authentication routes
 router.post("/signup", signUp)
 router.post("/login", login)
@@ -35,8 +35,12 @@ router.post('/sync', syncCart);
 router.post('/create-order', authenticate, requireUserOrGuestWithSession, createOrderAndInitializePayment);
 router.post('/webhook/paystack', verifyPaymentWebhook);
 router.get('/verify-payment-handler', verifyPaymentManual); // MOVED BEFORE PARAMETERIZED ROUTES
+router.get('/orders', authenticate, getOrders); // Get user's orders
+router.get('/orders/:orderId', authenticate, getOrderDetails); // Get specific order details
 router.post('/:orderId/confirm-delivery', authenticate, requireAuth, confirmOrderDelivery);
 
+// ✅ FIX: Move seller routes BEFORE parameterized routes
+router.use('/', sellerRoutes);
 // PRODUCT PARAMETERIZED ROUTES - MOVED TO THE BOTTOM
 router.patch('/:id', authenticate, restrictToSeller, updateProduct);
 router.delete('/:id', authenticate, restrictToSeller, deleteProduct)

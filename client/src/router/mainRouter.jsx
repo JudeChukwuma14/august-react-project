@@ -17,12 +17,16 @@ const SignupSeller = lazy(() => import("../components/auth/SignupSeller"));
 const LoginSeller = lazy(() => import("../components/auth/LoginSeller"));
 const Selectpath = lazy(() => import("../components/auth/Selectpath"));
 const Cart = lazy(() => import("../pages/Cart"));
+const Orders = lazy(() => import("../pages/Orders"));
 // seller pages
 const Dashboard = lazy(() => import("../Seller/pages/Dashboard"));
 const ProductFrom = lazy(() => import("../Seller/pages/ProductForm"));
 const ProductList = lazy(() => import("../Seller/pages/ProductList"));
 const PaymentVerification = lazy(() => import("../pages/PaymentVerification"));
 const OrderConfirmation = lazy(() => import("../pages/OrderConfirmation"));
+const SellerOrder = lazy(() => import("../Seller/pages/Orders"));
+const SellerOrderDetails = lazy(() => import("../Seller/pages/OrderDetails"));
+const Profile = lazy(() => import("../Seller/pages/Profile"));
 
 const withSuspense = (Component) => (
   <Suspense fallback={<Spinner />}>
@@ -59,6 +63,14 @@ const rotuerConfig = [
       // In your App.js or routing file
       { path: "/order-confirmation", element: withSuspense(OrderConfirmation) },
       {
+        path: "/orders",
+        element: withSuspense(Orders),
+      },
+      {
+        path: "/orders/:id",
+        element: withSuspense(Orders),
+      },
+      {
         path: "product/:id",
         element: withSuspense(ProductDetails),
       },
@@ -83,6 +95,16 @@ const rotuerConfig = [
       {
         path: "post-product",
         element: withSuspense(ProductFrom),
+      },
+      {
+        path: "seller-orders", element: withSuspense(SellerOrder)
+      },
+      {
+        path: "seller-profile", element: withSuspense(Profile)
+      },
+      {
+        path: "orders/:orderId", // Use orderId instead of id for clarity
+        element: withSuspense(SellerOrderDetails) // This shows specific order details
       },
     ],
   },

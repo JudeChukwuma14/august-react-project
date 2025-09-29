@@ -109,7 +109,6 @@ const verifyTransaction = async (reference, orderId) => {
 };
 
 
-// 3. Transfer to Seller (After Order Confirmation) - USING AXIOS
 const transferToSeller = async (order, sellerId, amount, orderId) => {
   try {
     // Get seller's payment details
@@ -118,11 +117,21 @@ const transferToSeller = async (order, sellerId, amount, orderId) => {
       throw new Error("Seller payment details not configured");
     }
 
+    // Check if we're in test mode
+    const isTestMode = process.env.NODE_ENV === 'development' || 
+                       process.env.PAYSTACK_SECRET_KEY?.includes('test');
+
+    if (isTestMode) {
+      // Paystack test mode doesn't allow actual transfers
+      const mockTransferCode = `test_transfer_${orderId}_${sellerId}_${Date.now()}`;
+      
+      return mockTransferCode;
+    }
     const response = await axios.post(
       "https://api.paystack.co/transfer",
       {
         source: "balance",
-        amount: Math.round(amount * 100),
+        amount: Math.round(amount * 100), // Convert to kobo
         recipient: seller.paystackRecipientCode,
         reason: `Payment for order ${orderId}`,
         reference: `transfer_${orderId}_${sellerId}_${Date.now()}`,
@@ -132,14 +141,22 @@ const transferToSeller = async (order, sellerId, amount, orderId) => {
           Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
+        timeout: 30000, // 30 second timeout
       }
     );
 
-    if (!response.data.status)
+    if (!response.data.status) {
       throw new Error("Transfer failed: " + response.data.message);
+    }
     return response.data.data.transfer_code;
   } catch (error) {
     console.error("Transfer error:", error.response?.data || error.message);
+    
+    // If it's a test mode limitation error, simulate success
+    if (error.response?.data?.message?.includes('Test mode')) {
+      return `test_transfer_${orderId}_${sellerId}_${Date.now()}`;
+    }
+    
     throw new Error(
       error.response?.data?.message || "Failed to transfer to seller"
     );

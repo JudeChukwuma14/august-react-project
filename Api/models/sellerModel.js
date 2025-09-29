@@ -1,6 +1,5 @@
-
-
 const mongoose = require('mongoose');
+
 const sellerSchema = new mongoose.Schema({
     storeName: {
         type: String,
@@ -26,6 +25,29 @@ const sellerSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
+    },
+    profileImage: {
+        type: String,
+        default: null
+    },
+    description: {
+        type: String,
+        default: ''
+    },
+    // Payment fields
+    paystackRecipientCode: {
+        type: String,
+        default: null
+    },
+    bankDetails: {
+        bankCode: String,
+        accountNumber: String, // This will store the masked version
+        accountName: String,
+        bankName: String
+    },
+    isPaymentSetup: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

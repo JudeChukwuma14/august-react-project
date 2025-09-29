@@ -20,11 +20,9 @@ const getAuthToken = () => {
     if (process.env.NODE_ENV === 'development') {
       const tokenFromStorage = localStorage.getItem('authToken');
       if (tokenFromStorage) {
-        console.log('Token found in localStorage (development)');
         return tokenFromStorage;
       }
     }
-    console.log('No token found, using httpOnly cookies (production)');
     return null;
   }
   return null;
@@ -33,14 +31,14 @@ const getAuthToken = () => {
 // Add token to all requests automatically (for development)
 api.interceptors.request.use((config) => {
   const token = getAuthToken();
-  
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
     console.log('Authorization header set with token for URL:', config.url);
   } else {
     console.log('No token in header, using httpOnly cookies for:', config.url);
   }
-  
+
   return config;
 }, (error) => {
   return Promise.reject(error);
@@ -154,8 +152,31 @@ export const verifyPayment = async (reference, orderId) => {
     console.error('Verify payment error:', error.response?.data || error.message);
     throw new Error(error.response?.data?.message || 'Failed to verify payment');
   }
-}; 
+};
 
+// Get user's orders
+export const getOrders = async () => {
+  try {
+    const response = await api.get('/orders');
+    return response.data;
+  } catch (error) {
+    console.error('Get orders error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to get orders');
+  }
+};
+
+// Get specific order details
+export const getOrderDetails = async (orderId) => {
+  try {
+    const response = await api.get(`/orders/${orderId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Get order details error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to get order details');
+  }
+};
+
+// Confirm order delivery
 export const confirmOrderDelivery = async (orderId) => {
   try {
     const response = await api.post(`/${orderId}/confirm-delivery`);

@@ -1,4 +1,3 @@
-
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -7,13 +6,13 @@ import {
   ShoppingBagIcon,
   ShoppingCartIcon,
   LogOutIcon,
+  Settings,
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify"; 
+import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { setSellerLogout } from "../../redux/slices/sellerSlices";
-
 
 export const Siderbar = ({ sidebarOpen, setSidebarOpen }) => {
   const location = useLocation();
@@ -21,10 +20,10 @@ export const Siderbar = ({ sidebarOpen, setSidebarOpen }) => {
   const [contentOpen, setContentOpen] = useState(false);
 
   const navigate = useNavigate();
-  const dispatch = useDispatch() 
+  const dispatch = useDispatch();
 
   const handleLogout = async () => {
-    dispatch(setSellerLogout())
+    dispatch(setSellerLogout());
     toast.success("Logged out successfully");
     navigate("/seller-login");
     setSidebarOpen(false);
@@ -46,8 +45,9 @@ export const Siderbar = ({ sidebarOpen, setSidebarOpen }) => {
       >
         <div className="flex-1">
           <div className="flex items-center justify-center h-16 border-b border-gray-200">
-           <Link to="/">
-            <h1 className="text-xl font-bold">FashionHub™</h1></Link>
+            <Link to="/">
+              <h1 className="text-xl font-bold">FashionHub™</h1>
+            </Link>
           </div>
 
           <nav className="px-2 mt-5">
@@ -108,9 +108,9 @@ export const Siderbar = ({ sidebarOpen, setSidebarOpen }) => {
             </div>
 
             <Link
-              to="/orders"
+              to="/seller/seller-orders"
               className={`mt-1 group flex items-center px-2 py-2 text-base font-medium rounded-md ${
-                location.pathname.includes("/orders")
+                location.pathname.includes("/seller/seller-orders")
                   ? "bg-[#85f3dd] text-white"
                   : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#36d7b7]"
               }`}
@@ -119,69 +119,17 @@ export const Siderbar = ({ sidebarOpen, setSidebarOpen }) => {
               Orders
             </Link>
 
-            <div className="mt-1">
-              <button
-                onClick={() => setContentOpen(!contentOpen)}
-                className={`w-full group flex items-center px-2 py-2 text-base font-medium rounded-md ${
-                  location.pathname.includes("/content")
-                    ? "bg-[#85f3dd] text-white"
-                    : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#36d7b7]"
-                }`}
-                aria-expanded={contentOpen}
-              >
-                <NewspaperIcon className="w-6 h-6 mr-3" />
-                Content
-                {contentOpen ? (
-                  <ChevronUpIcon className="w-5 h-5 ml-auto" />
-                ) : (
-                  <ChevronDownIcon className="w-5 h-5 ml-auto" />
-                )}
-              </button>
-              {contentOpen && (
-                <div className="pl-10 pr-2 mt-1 space-y-1">
-                  <Link
-                    to="/content/posts"
-                    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                      location.pathname === "/content/posts"
-                        ? "bg-[#85f3dd] text-white"
-                        : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#36d7b7]"
-                    }`}
-                  >
-                    Posts
-                  </Link>
-                  <Link
-                    to="/content/posts/create"
-                    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                      location.pathname === "/content/posts/create"
-                        ? "bg-[#85f3dd] text-white"
-                        : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#36d7b7]"
-                    }`}
-                  >
-                    Create Post
-                  </Link>
-                  <Link
-                    to="/content/pages"
-                    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                      location.pathname === "/content/pages"
-                        ? "bg-[#85f3dd] text-white"
-                        : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#36d7b7]"
-                    }`}
-                  >
-                    Pages
-                  </Link>
-                  <Link
-                    to="/content/media"
-                    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                      location.pathname === "/content/media"
-                        ? "bg-[#85f3dd] text-white"
-                        : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#36d7b7]"
-                    }`}
-                  >
-                    Media
-                  </Link>
-                </div>
-              )}
-            </div>
+            <Link
+              to="/seller/seller-profile"
+              className={`mt-1 group flex items-center px-2 py-2 text-base font-medium rounded-md ${
+                location.pathname.includes("/seller/seller-profile")
+                  ? "bg-[#85f3dd] text-white"
+                  : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#36d7b7]"
+              }`}
+            >
+              <Settings className="w-6 h-6 mr-3" />
+              Profile Setting
+            </Link>
           </nav>
         </div>
 

@@ -23,7 +23,6 @@ const Signin = () => {
     setIsLoading(true);
     try {
       const response = await LoginUser(data);
-      console.log("User login successful:", response);
 
       // For development, store token in localStorage and Redux
       if (response.token) {

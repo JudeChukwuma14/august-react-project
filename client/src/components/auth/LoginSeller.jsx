@@ -22,7 +22,6 @@ const LoginSeller = () => {
     setIsLoading(true);
     try {
       const response = await sellerLogin(data);
-      console.log("Seller login successful:", response);
 
       // For development, store token in localStorage and Redux
       if (response.token) {

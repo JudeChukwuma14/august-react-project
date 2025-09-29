@@ -37,11 +37,64 @@ const sellerSlice = createSlice({
     },
     updateSeller: (state, action) => {
       if (state.seller) {
-        state.seller = { ...state.seller, ...action.payload };
+        // Merge the existing seller data with the updated fields
+        state.seller = { 
+          ...state.seller, 
+          ...action.payload 
+        };
+        console.log('Seller updated in Redux:', state.seller);
       }
     },
+    updateSellerProfile: (state, action) => {
+      if (state.seller) {
+        state.seller = { 
+          ...state.seller, 
+          ...action.payload 
+        };
+        console.log('Seller profile updated in Redux');
+      }
+    },
+    updateSellerPayment: (state, action) => {
+      if (state.seller) {
+        state.seller = {
+          ...state.seller,
+          ...action.payload,
+          isPaymentSetup: true
+        };
+        console.log('Seller payment details updated in Redux');
+      }
+    },
+    // Add more specific update actions if needed
+    updateStoreName: (state, action) => {
+      if (state.seller) {
+        state.seller.storeName = action.payload;
+      }
+    },
+    updateStoreDescription: (state, action) => {
+      if (state.seller) {
+        state.seller.description = action.payload;
+      }
+    },
+    updateStoreContact: (state, action) => {
+      if (state.seller) {
+        state.seller = {
+          ...state.seller,
+          ...action.payload
+        };
+      }
+    }
   },
 });
 
-export const { setSellerLogin, setSellerLogout, updateSeller } = sellerSlice.actions;
+export const { 
+  setSellerLogin, 
+  setSellerLogout, 
+  updateSeller, 
+  updateSellerProfile,
+  updateSellerPayment,
+  updateStoreName,
+  updateStoreDescription,
+  updateStoreContact
+} = sellerSlice.actions;
+
 export default sellerSlice.reducer;
