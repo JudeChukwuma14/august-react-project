@@ -10,12 +10,17 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const user = useSelector((state) => state.user?.user || null);
   const seller = useSelector((state) => state.seller?.seller || null);
-  console.log(seller)
 
+  // Safe access to user and seller properties
   const firstLetter = user?.username
     ? user.username.charAt(0).toUpperCase()
     : null;
-  const cartItems = useSelector((state) => state.cart.items);
+
+  const sellerLetter = seller?.storeName
+    ? seller.storeName.charAt(0).toUpperCase()
+    : null;
+
+  const cartItems = useSelector((state) => state.cart.items || []);
   const totalQuantity = cartItems.reduce(
     (total, item) => total + (item.quantity || 1),
     0
@@ -73,21 +78,38 @@ const Header = () => {
             )}
           </Link>
         </div>
-        {user ? (
-          <div className="flex items-center gap-3">
-            <h1 className="cursor-pointer font-bold text-lg bg-[#36d7b7] text-white rounded-full h-[30px] w-[30px] flex justify-center items-center ring-4">
-              {firstLetter}
-            </h1>
-            <IoMdLogOut onClick={handleLogoutUser} className="cursor-pointer" />
-          </div>
-        ) : (
-          <Link
-            to="/selectpath"
-            className="px-4 py-2 bg-[#36d7b7] text-white rounded-md text-xs hidden md:block"
-          >
-            Get Started
-          </Link>
-        )}
+        <div>
+          {seller ? (
+            <div className="flex items-center gap-3">
+              <Link to="/seller">
+                <h1 className="cursor-pointer font-bold text-lg bg-[#36d7b7] text-white rounded-full h-[30px] w-[30px] flex justify-center items-center ring-4">
+                  {sellerLetter}
+                </h1>
+              </Link>
+            </div>
+          ) : user ? (
+            <div className="flex items-center gap-3">
+              <Link to="">
+                <h1 className="cursor-pointer font-bold text-lg bg-[#36d7b7] text-white rounded-full h-[30px] w-[30px] flex justify-center items-center ring-4">
+                  {firstLetter}
+                </h1>
+              </Link>
+              <IoMdLogOut
+                onClick={handleLogoutUser}
+                className="cursor-pointer"
+                size={20}
+              />
+            </div>
+          ) : (
+            <Link
+              to="/selectpath"
+              className="px-4 py-2 bg-[#36d7b7] text-white rounded-md text-xs hidden md:block"
+            >
+              Get Started
+            </Link>
+          )}
+        </div>
+
         <MdMenu
           size={25}
           className="block cursor-pointer md:hidden"
@@ -142,7 +164,7 @@ const Header = () => {
                 Contact
               </Link>
             </li>
-            {!user && (
+            {!user && !seller && (
               <li>
                 <Link
                   to="/selectpath"
@@ -153,7 +175,7 @@ const Header = () => {
                 </Link>
               </li>
             )}
-            {user && (
+            {(user || seller) && (
               <li>
                 <button
                   onClick={() => {

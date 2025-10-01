@@ -2,7 +2,6 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   HomeIcon,
-  NewspaperIcon,
   ShoppingBagIcon,
   ShoppingCartIcon,
   LogOutIcon,
@@ -17,8 +16,7 @@ import { setSellerLogout } from "../../redux/slices/sellerSlices";
 export const Siderbar = ({ sidebarOpen, setSidebarOpen }) => {
   const location = useLocation();
   const [productsOpen, setProductsOpen] = useState(false);
-  const [contentOpen, setContentOpen] = useState(false);
-
+  
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -29,76 +27,99 @@ export const Siderbar = ({ sidebarOpen, setSidebarOpen }) => {
     setSidebarOpen(false);
   };
 
+  const handleLinkClick = () => {
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  };
+
+  const handleOverlayClick = () => {
+    setSidebarOpen(false);
+  };
+
   return (
     <>
+      {/* Mobile overlay */}
       <div
-        className={`fixed inset-0 z-20 bg-opacity-50 transition-opacity md:hidden ${
-          sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        className={`fixed inset-0 z-30 bg-black bg-opacity-50 transition-opacity duration-300 md:hidden ${
+          sidebarOpen 
+            ? "opacity-100 pointer-events-auto" 
+            : "opacity-0 pointer-events-none"
         }`}
-        onClick={() => setSidebarOpen(false)}
+        onClick={handleOverlayClick}
       />
 
+      {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-30 w-56 bg-white shadow-lg transform transition-transform duration-300 ease-in-out md:w-64 md:translate-x-0 md:static md:inset-0 flex flex-col ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:z-auto flex flex-col ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex-1">
-          <div className="flex items-center justify-center h-16 border-b border-gray-200">
-            <Link to="/">
-              <h1 className="text-xl font-bold">FashionHub™</h1>
-            </Link>
-          </div>
+        {/* Header - removed close button */}
+        <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200">
+          <Link to="/" onClick={handleLinkClick}>
+            <h1 className="text-xl font-bold text-gray-800">FashionHub™</h1>
+          </Link>
+        </div>
 
-          <nav className="px-2 mt-5">
+        {/* Navigation */}
+        <div className="flex-1 px-4 py-4 overflow-y-auto">
+          <nav className="space-y-2">
             <Link
               to="/seller"
-              className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${
+              onClick={handleLinkClick}
+              className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                 location.pathname === "/seller"
-                  ? "bg-[#85f3dd] text-white"
-                  : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#36d7b7]"
+                  ? "bg-[#36d7b7] text-white"
+                  : "text-gray-700 hover:bg-gray-100 hover:text-[#36d7b7]"
               }`}
             >
-              <HomeIcon className="w-6 h-6 mr-3" />
+              <HomeIcon className="w-5 h-5 mr-3" />
               Dashboard
             </Link>
 
-            <div className="mt-1">
+            {/* Products Section */}
+            <div>
               <button
                 onClick={() => setProductsOpen(!productsOpen)}
-                className={`w-full group flex items-center px-2 py-2 text-base font-medium rounded-md ${
-                  location.pathname.includes("/post-product")
-                    ? "bg-[#85f3dd] text-white"
-                    : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#36d7b7]"
+                className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  location.pathname.includes("/seller/product") ||
+                  location.pathname.includes("/seller/post-product")
+                    ? "bg-[#36d7b7] text-white"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-[#36d7b7]"
                 }`}
-                aria-expanded={productsOpen}
               >
-                <ShoppingBagIcon className="w-6 h-6 mr-3" />
-                Products
+                <div className="flex items-center">
+                  <ShoppingBagIcon className="w-5 h-5 mr-3" />
+                  Products
+                </div>
                 {productsOpen ? (
-                  <ChevronUpIcon className="w-5 h-5 ml-auto" />
+                  <ChevronUpIcon className="w-4 h-4" />
                 ) : (
-                  <ChevronDownIcon className="w-5 h-5 ml-auto" />
+                  <ChevronDownIcon className="w-4 h-4" />
                 )}
               </button>
+              
               {productsOpen && (
-                <div className="pl-10 pr-2 mt-1 space-y-1">
+                <div className="pl-8 mt-1 space-y-1">
                   <Link
                     to="/seller/product"
-                    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                      location.pathname === "/seller/products"
-                        ? "bg-[#85f3dd] text-white"
-                        : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#36d7b7]"
+                    onClick={handleLinkClick}
+                    className={`block px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      location.pathname === "/seller/product"
+                        ? "bg-[#36d7b7] text-white"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-[#36d7b7]"
                     }`}
                   >
                     Product List
                   </Link>
                   <Link
                     to="/seller/post-product"
-                    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                    onClick={handleLinkClick}
+                    className={`block px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                       location.pathname === "/seller/post-product"
-                        ? "bg-[#85f3dd] text-white"
-                        : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#36d7b7]"
+                        ? "bg-[#36d7b7] text-white"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-[#36d7b7]"
                     }`}
                   >
                     Create Product
@@ -109,36 +130,39 @@ export const Siderbar = ({ sidebarOpen, setSidebarOpen }) => {
 
             <Link
               to="/seller/seller-orders"
-              className={`mt-1 group flex items-center px-2 py-2 text-base font-medium rounded-md ${
+              onClick={handleLinkClick}
+              className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                 location.pathname.includes("/seller/seller-orders")
-                  ? "bg-[#85f3dd] text-white"
-                  : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#36d7b7]"
+                  ? "bg-[#36d7b7] text-white"
+                  : "text-gray-700 hover:bg-gray-100 hover:text-[#36d7b7]"
               }`}
             >
-              <ShoppingCartIcon className="w-6 h-6 mr-3" />
+              <ShoppingCartIcon className="w-5 h-5 mr-3" />
               Orders
             </Link>
 
             <Link
               to="/seller/seller-profile"
-              className={`mt-1 group flex items-center px-2 py-2 text-base font-medium rounded-md ${
+              onClick={handleLinkClick}
+              className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                 location.pathname.includes("/seller/seller-profile")
-                  ? "bg-[#85f3dd] text-white"
-                  : "text-gray-600 hover:bg-[#F7F7F7] hover:text-[#36d7b7]"
+                  ? "bg-[#36d7b7] text-white"
+                  : "text-gray-700 hover:bg-gray-100 hover:text-[#36d7b7]"
               }`}
             >
-              <Settings className="w-6 h-6 mr-3" />
-              Profile Setting
+              <Settings className="w-5 h-5 mr-3" />
+              Profile Settings
             </Link>
           </nav>
         </div>
 
+        {/* Logout Button */}
         <div className="p-4 border-t border-gray-200">
           <button
             onClick={handleLogout}
-            className="w-full group flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-600 hover:bg-[#F7F7F7] hover:text-[#36d7b7]"
+            className="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-700 transition-colors rounded-lg hover:bg-gray-100 hover:text-red-600"
           >
-            <LogOutIcon className="w-6 h-6 mr-3" />
+            <LogOutIcon className="w-5 h-5 mr-3" />
             Logout
           </button>
         </div>

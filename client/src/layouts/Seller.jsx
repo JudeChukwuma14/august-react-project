@@ -4,17 +4,7 @@ import { Outlet } from "react-router-dom";
 import { Navbar } from "../components/static/Navbar";
 import { Siderbar } from "../components/static/Siderbar";
 
-// import { useEffect } from "react";
-
-// useEffect(() => {
-//   // Code to run after render
-
-//   return () => {
-//     // Cleanup code (runs before component unmount or before next effect)
-//   };
-// }, [dependencies]);
-
-const useLoading = (delay = 2000) => {
+const useLoading = (delay = 1000) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,16 +18,24 @@ const useLoading = (delay = 2000) => {
 };
 
 export const SellerLayout = () => {
-  const [sidebarOpen, setSiderbarOpen] = useState(false);
-  const loading = useLoading();
-  return loading ? (
-    <Spinner />
-  ) : (
-    <div className="flex h-screen">
-      <Siderbar sidebarOpen={sidebarOpen} setSiderbarOpen={setSiderbarOpen} />
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const loading = useLoading(500); // Reduced loading time for better UX
+
+  // Debug effect to log sidebar state changes
+  useEffect(() => {
+    console.log('SellerLayout - sidebarOpen changed:', sidebarOpen);
+  }, [sidebarOpen]);
+
+  if (loading) {
+    return <Spinner />;
+  }
+
+  return (
+    <div className="flex h-screen bg-gray-50">
+      <Siderbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="flex flex-col flex-1 overflow-hidden">
-        <Navbar sidebarOpen={sidebarOpen} setSiderbarOpen={setSiderbarOpen} />
-        <main className="flex-1 p-4 overflow-y-auto md:p-6 ">
+        <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <main className="flex-1 p-4 overflow-y-auto md:p-6">
           <Outlet />
         </main>
       </div>

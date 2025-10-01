@@ -263,7 +263,7 @@ const Home = () => {
       </section>
 
       {/* Trending Now */}
-      <section className="py-20 bg-muted/30">
+      {/* <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <span className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium mb-4 inline-block">
@@ -288,7 +288,7 @@ const Home = () => {
                   ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Featured Collections */}
       <section className="py-20">
@@ -309,7 +309,7 @@ const Home = () => {
               : featuredCollections.slice(0, 4).map((collection) => (
                   <Link
                     key={collection.id}
-                    to={`/collections/${collection.id}`}
+                    to="/shop"
                     className="group overflow-hidden rounded-lg bg-card shadow-card hover:shadow-elegant transition-smooth cursor-pointer"
                   >
                     <div className="relative h-64 overflow-hidden">
@@ -334,7 +334,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Shop by Category */}
+      {/* Shop by Category
       <section className="py-20 bg-secondary/20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -372,7 +372,7 @@ const Home = () => {
                 ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Special Offers */}
       <section className="py-20 bg-gradient-subtle">
