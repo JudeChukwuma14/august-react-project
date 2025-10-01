@@ -9,12 +9,15 @@ import { IoMdLogOut } from "react-icons/io";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const user = useSelector((state) => state.user?.user || null);
+  const seller = useSelector((state) => state.seller?.seller || null);
+  console.log(seller)
+
   const firstLetter = user?.username
     ? user.username.charAt(0).toUpperCase()
     : null;
   const cartItems = useSelector((state) => state.cart.items);
   const totalQuantity = cartItems.reduce(
-    (total, item) => total + (item.quantity || 1), // Fallback to 1 if quantity is missing
+    (total, item) => total + (item.quantity || 1),
     0
   );
   const dispatch = useDispatch();

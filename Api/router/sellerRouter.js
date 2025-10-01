@@ -4,28 +4,26 @@ const { authenticate, restrictToSeller } = require('../middleware/auth');
 
 const router = express.Router();
 
-// All seller routes require authentication and seller role
-router.use(authenticate);
-router.use(restrictToSeller);
 
 // Dashboard stats
-router.get('/stats', getSellerStats);
+router.get('/stats', authenticate, restrictToSeller, getSellerStats);
 
 // Orders management
-router.get('/orders', getSellerOrders);
+router.get('/orders', authenticate, restrictToSeller, getSellerOrders);
 
 // Products analytics
-router.get('/products/top-selling', getTopSellingProducts);
+router.get('/products/top-selling', authenticate, restrictToSeller, getTopSellingProducts);
 
 // Profile management
-router.put('/profile', updateSellerProfile);
+router.put('/profile', authenticate, restrictToSeller, updateSellerProfile);
 
-router.get('/orders/:orderId', getSellerOrderDetails);
+router.get('/orders/:orderId', authenticate, restrictToSeller, getSellerOrderDetails);
 
-router.post('/payment/setup', setupSellerPayment);
+router.post('/payment/setup', authenticate, restrictToSeller, setupSellerPayment);
 
-router.get('/banks', getBanks)
-router.post('/verify-account', verifyBankAccount);
+router.get('/banks', authenticate, restrictToSeller, getBanks)
+
+router.post('/verify-account', authenticate, restrictToSeller, verifyBankAccount);
 
 
 module.exports = router;

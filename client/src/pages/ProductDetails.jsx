@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, Star, Plus, Minus } from 'lucide-react';
-import { useDispatch } from 'react-redux';
-import { addItem } from '../redux/slices/cartSlices';
+import { useDispatch, useSelector } from 'react-redux';
+import { addItem, setCartStatus } from '../redux/slices/cartSlices';
 import { getProductById } from '../service/userApi';
 import { toast } from 'react-toastify';
 
@@ -16,7 +16,7 @@ const ProductDetails = () => {
   const [currentImage, setCurrentImage] = useState(0);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const { status } = useSelector((state) => state.cart);
   // Fallback mock data
   const mockProduct = {
     id: id || '1',
@@ -83,19 +83,32 @@ const ProductDetails = () => {
     fetchProduct();
   }, [id]);
 
-  const handleAddToCart = () => {
-    dispatch(
-      addItem({
-        id: product._id || product.id,
-        name: product.title || product.name,
-        price: product.price,
-        image: product.images[0],
-        seller: product.seller.storeName,
-        size: selectedSize,
-        quantity,
-      })
-    );
-    toast.success(`${product.title || product.name} added to cart!`);
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (status === "loading") return;
+
+    const item = {
+      productId: product._id || product.id,
+      name: product.title || product.name || "Untitled Product",
+      price: Math.round(product.price || 0),
+      image:
+        product.images?.[0] ||
+        product.image ||
+        "https://via.placeholder.com/150",
+      seller:
+        product.seller?.storeName || product.seller?.name || "Unknown Seller",
+      quantity: 1,
+    };
+
+    dispatch(setCartStatus({ status: "loading" }));
+    dispatch(addItem(item));
+    toast.success(`${item.name} added to cart!`);
+
+    // Reset status after a short delay
+    setTimeout(() => {
+      dispatch(setCartStatus({ status: "succeeded" }));
+    }, 500);
   };
 
   if (loading) {
