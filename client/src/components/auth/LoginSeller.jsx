@@ -22,26 +22,13 @@ const LoginSeller = () => {
     setIsLoading(true);
     try {
       const response = await sellerLogin(data);
-
-      // For development, store token in localStorage and Redux
-      if (response.token) {
-        localStorage.setItem("authToken", response.token);
-        dispatch(
-          setSellerLogin({
-            seller: response.data,
-            token: response.token,
-          })
-        );
-      } else {
-        // For production, just store user data (token is in httpOnly cookie)
-        dispatch(
-          setSellerLogin({
-            seller: response.data,
-            token: null,
-          })
-        );
-      }
-
+      localStorage.setItem("authToken", response.token);
+      dispatch(
+        setSellerLogin({
+          seller: response.data,
+          token: null,
+        })
+      );
       toast.success(response.message || "Login successfully");
       navigate("/seller");
     } catch (error) {
