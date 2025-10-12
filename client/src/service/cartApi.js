@@ -10,7 +10,6 @@ export const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // Important for cookies
 });
 
 // Get authentication token from storage

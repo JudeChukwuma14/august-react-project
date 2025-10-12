@@ -89,36 +89,15 @@ const login = async (req, res) => {
       process.env.JWT_SECRET || process.env.JWT,
       { expiresIn: "1h" }
     );
-
-    // Set httpOnly cookie for production, send token for development
-    if (process.env.NODE_ENV === 'production') {
-      res.cookie('authToken', token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        maxAge: 3600000, // 1 hour
-      });
-
-      res.status(200).json({
-        data: {
-          username: user.username,
-          email: user.email,
-          _id: user._id
-        },
-        message: "Login successful",
-      });
-    } else {
-      // Development - send token in response
-      res.status(200).json({
-        data: {
-          username: user.username,
-          email: user.email,
-          _id: user._id
-        },
-        token,
-        message: "Login successful",
-      });
-    }
+    res.status(200).json({
+      data: {
+        username: user.username,
+        email: user.email,
+        _id: user._id
+      },
+      token,
+      message: "Login successful",
+    });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
@@ -144,41 +123,19 @@ const loginSeller = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    // Set httpOnly cookie for production, send token for development
-    if (process.env.NODE_ENV === 'production') {
-      res.cookie('authToken', token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        maxAge: 3600000, // 1 hour
-      });
+    res.status(200).json({
+      data: {
+        storeName: seller.storeName,
+        email: seller.email,
+        phoneNumber: seller.phoneNumber,
+        categories: seller.categories,
+        address: seller.address,
+        _id: seller._id
+      },
+      token,
+      message: `Welcome ${seller.storeName}`,
+    });
 
-      res.status(200).json({
-        data: {
-          storeName: seller.storeName,
-          email: seller.email,
-          phoneNumber: seller.phoneNumber,
-          categories: seller.categories,
-          address: seller.address,
-          _id: seller._id
-        },
-        message: `Welcome ${seller.storeName}`,
-      });
-    } else {
-      // Development - send token in response
-      res.status(200).json({
-        data: {
-          storeName: seller.storeName,
-          email: seller.email,
-          phoneNumber: seller.phoneNumber,
-          categories: seller.categories,
-          address: seller.address,
-          _id: seller._id
-        },
-        token,
-        message: `Welcome ${seller.storeName}`,
-      });
-    }
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
