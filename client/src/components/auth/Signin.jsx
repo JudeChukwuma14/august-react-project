@@ -28,7 +28,7 @@ const Signin = () => {
       dispatch(
         setUserLogin({
           user: response.data,
-          token: null,
+          token: response.token,
         })
       );
 
