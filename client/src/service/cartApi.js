@@ -15,16 +15,14 @@ export const api = axios.create({
 // Get authentication token from storage
 const getAuthToken = () => {
   if (typeof window !== 'undefined') {
-    // For development - check localStorage
-    if (process.env.NODE_ENV === 'development') {
+    
       const tokenFromStorage = localStorage.getItem('authToken');
       if (tokenFromStorage) {
         return tokenFromStorage;
       }
     }
     return null;
-  }
-  return null;
+
 };
 
 // Add token to all requests automatically (for development)
