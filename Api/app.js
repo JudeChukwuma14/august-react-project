@@ -8,7 +8,7 @@ const cookieParser = require("cookie-parser")
 const helmet = require('helmet');
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/unknown")
+  .connect(process.env.MD)
   .then(() => {
     console.log("Connected to MongoDB");
   })

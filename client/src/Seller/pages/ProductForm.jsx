@@ -118,7 +118,7 @@ const ProductForm = () => {
       });
 
       const response = await axios.post(
-        "http://localhost:3000/api/product-upload",
+        "https://august-project-backend.onrender.com/api/product-upload",
         payload,
         {
           headers: {

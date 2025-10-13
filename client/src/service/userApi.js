@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api";
+const API_URL = "https://august-project-backend.onrender.com/api";
 
 // Create axios instance with credentials
 export const api = axios.create({
@@ -52,7 +52,7 @@ export const sellerLogin = async (sellerData) => {
 export const postProduct = async () => {
   try {
     const response = await api.post(
-      "http://localhost:3000/api/product-upload",
+      "https://august-project-backend.onrender.com/api/product-upload",
       payload,
       {
         headers: {
