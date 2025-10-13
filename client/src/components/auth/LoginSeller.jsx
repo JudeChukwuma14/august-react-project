@@ -23,14 +23,15 @@ const LoginSeller = () => {
     try {
       const response = await sellerLogin(data);
 
+    
+        localStorage.setItem("authToken", response.token);
         dispatch(
           setSellerLogin({
             seller: response.data,
             token: response.token,
           })
         );
-        console.log(response);
-      
+   
       toast.success(response.message || "Login successfully");
       navigate("/seller");
     } catch (error) {
