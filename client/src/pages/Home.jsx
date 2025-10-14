@@ -282,33 +282,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Trending Now */}
-      {/* <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <span className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium mb-4 inline-block">
-              Trending Now
-            </span>
-            <h2 className="text-4xl font-playfair font-bold mb-4">
-              What's Hot This Week
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Stay ahead of the curve with our most popular items
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {loading.hot
-              ? Array(4)
-                  .fill()
-                  .map((_, i) => <SkeletonProductCard key={i} />)
-              : hotProducts
-                  .slice(0, 4)
-                  .map((product) => (
-                    <ProductCard key={product._id} product={product} />
-                  ))}
-          </div>
-        </div>
-      </section> */}
 
       {/* Featured Collections */}
       <section className="py-20">
@@ -354,45 +327,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Shop by Category
-      <section className="py-20 bg-secondary/20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-playfair font-bold mb-4">
-              Shop by Category
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Find exactly what you're looking for
-            </p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {loading.categories
-              ? Array(6)
-                  .fill()
-                  .map((_, i) => <SkeletonCategoryCard key={i} />)
-              : categories.map((category) => (
-                  <Link
-                    key={category.name}
-                    to={`/categories/${category.name.toLowerCase()}`}
-                    className="group text-center hover:scale-105 transition-smooth"
-                  >
-                    <div className="relative w-full aspect-square rounded-full overflow-hidden mb-3 mx-auto">
-                      <img
-                        src={category.image}
-                        alt={category.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
-                      />
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-                    </div>
-                    <h3 className="font-semibold mb-1">{category.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {category.count} items
-                    </p>
-                  </Link>
-                ))}
-          </div>
-        </div>
-      </section> */}
+    
 
       {/* Special Offers */}
       <section className="py-20 bg-gradient-subtle">
@@ -419,7 +354,7 @@ const Home = () => {
                   <span>Extra 10% off for new customers</span>
                 </div>
               </div>
-              <Link to="/categories">
+              <Link to="/shop">
                 <button className="bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 rounded-md text-lg font-medium flex items-center gap-2 transition-colors">
                   Shop Sale Items
                   <ArrowRight className="h-5 w-5" />
