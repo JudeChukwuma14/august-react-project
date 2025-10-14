@@ -197,13 +197,17 @@ const Home = () => {
             Discover unique fashion pieces and connect with sellers worldwide
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link to="/shop">
             <button className="bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 rounded-md text-lg font-medium transition-colors flex items-center justify-center gap-2">
               Shop Now
               <ArrowRight className="h-5 w-5" />
             </button>
+          </Link>
+           <Link to="/shop">
             <button className="bg-secondary text-secondary-foreground hover:bg-secondary/80 h-11 px-8 rounded-md text-lg font-medium transition-colors">
               Start Selling
             </button>
+           </Link>
           </div>
         </div>
       </section>
