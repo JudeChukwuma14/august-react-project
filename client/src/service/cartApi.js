@@ -15,7 +15,6 @@ export const api = axios.create({
 // Get authentication token from storage
 const getAuthToken = () => {
   if (typeof window !== 'undefined') {
-    
       const tokenFromStorage = localStorage.getItem('authToken');
       if (tokenFromStorage) {
         return tokenFromStorage;

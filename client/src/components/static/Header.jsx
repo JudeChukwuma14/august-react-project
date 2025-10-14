@@ -1,196 +1,299 @@
-import React, { useState } from "react";
-import { FaSearch, FaShoppingBag, FaShoppingCart } from "react-icons/fa";
-import { MdMenu } from "react-icons/md";
+import React, { useState, useRef, useEffect } from "react";
+import { FaSearch, FaShoppingCart, FaUser, FaStore } from "react-icons/fa";
+import { HiMenuAlt3 } from "react-icons/hi";
+import { IoMdLogOut, IoMdClose } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { setUserLogout } from "../../redux/slices/userSlices";
-import { IoMdLogOut } from "react-icons/io";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const menuRef = useRef(null);
+  const searchRef = useRef(null);
+  
   const user = useSelector((state) => state.user?.user || null);
   const seller = useSelector((state) => state.seller?.seller || null);
+  const cartItems = useSelector((state) => state.cart.items || []);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Safe access to user and seller properties
-  const firstLetter = user?.username
-    ? user.username.charAt(0).toUpperCase()
-    : null;
+  const userInitial = user?.username?.charAt(0)?.toUpperCase() || "U";
+  const sellerInitial = seller?.storeName?.charAt(0)?.toUpperCase() || "S";
 
-  const sellerLetter = seller?.storeName
-    ? seller.storeName.charAt(0).toUpperCase()
-    : null;
-
-  const cartItems = useSelector((state) => state.cart.items || []);
   const totalQuantity = cartItems.reduce(
     (total, item) => total + (item.quantity || 1),
     0
   );
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
 
-  const handleLogoutUser = () => {
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(event.target) && isSearchOpen) {
+        setIsSearchOpen(false);
+        setSearchQuery("");
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isSearchOpen]);
+
+  const handleLogout = () => {
     dispatch(setUserLogout());
+    setIsMenuOpen(false);
     navigate("/selectpath");
   };
 
-  return (
-    <header className="flex items-center justify-between w-full h-20 px-5 shadow-lg md:px-14">
-      <div className="md:text-xl text-[20px] font-semibold">
-        <Link to="/">FashionHub</Link>
-      </div>
-      <nav className="hidden md:block" role="navigation">
-        <ul className="flex gap-8">
-          <li className="font-semibold">
-            <Link to="/" className="hover:text-[#36d7b7]">
-              Home
-            </Link>
-          </li>
-          <li className="font-semibold">
-            <Link to="/shop" className="hover:text-[#36d7b7]">
-              Shop
-            </Link>
-          </li>
-          <li className="font-semibold">
-            <Link to="/about" className="hover:text-[#36d7b7]">
-              About
-            </Link>
-          </li>
-          <li className="font-semibold">
-            <Link to="/contact" className="hover:text-[#36d7b7]">
-              Contact
-            </Link>
-          </li>
-        </ul>
-      </nav>
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-3">
-          <FaSearch size={20} className="cursor-pointer" />
-          <Link
-            to="/cart"
-            className="relative p-2 transition-colors duration-200 rounded-full"
-            aria-label="Shopping Cart"
-          >
-            <FaShoppingCart size={20} />
-            {totalQuantity > 0 && (
-              <span className="absolute -top-1 -right-1 text-xs text-white bg-[#36d7b7] rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-md">
-                {totalQuantity}
-              </span>
-            )}
-          </Link>
-        </div>
-        <div>
-          {seller ? (
-            <div className="flex items-center gap-3">
-              <Link to="/seller">
-                <h1 className="cursor-pointer font-bold text-lg bg-[#36d7b7] text-white rounded-full h-[30px] w-[30px] flex justify-center items-center ring-4">
-                  {sellerLetter}
-                </h1>
-              </Link>
-            </div>
-          ) : user ? (
-            <div className="flex items-center gap-3">
-              <Link to="">
-                <h1 className="cursor-pointer font-bold text-lg bg-[#36d7b7] text-white rounded-full h-[30px] w-[30px] flex justify-center items-center ring-4">
-                  {firstLetter}
-                </h1>
-              </Link>
-              <IoMdLogOut
-                onClick={handleLogoutUser}
-                className="cursor-pointer"
-                size={20}
-              />
-            </div>
-          ) : (
-            <Link
-              to="/selectpath"
-              className="px-4 py-2 bg-[#36d7b7] text-white rounded-md text-xs hidden md:block"
-            >
-              Get Started
-            </Link>
-          )}
-        </div>
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setIsSearchOpen(false);
+      setSearchQuery("");
+    }
+  };
 
-        <MdMenu
-          size={25}
-          className="block cursor-pointer md:hidden"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle menu"
-          aria-expanded={isMenuOpen}
-        />
-      </div>
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div
-          className={`absolute left-0 w-full bg-white shadow-lg top-20 z-50 md:hidden transition-all duration-300 ease-in-out ${
-            isMenuOpen
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 -translate-y-10 pointer-events-none"
-          }`}
-        >
-          <ul className="flex flex-col items-center gap-3 p-4">
-            <li className="font-semibold">
+  const navigation = [
+    { name: "Home", path: "/", current: location.pathname === "/" },
+    { name: "Shop", path: "/shop", current: location.pathname === "/shop" },
+    { name: "About", path: "/about", current: location.pathname === "/about" },
+    { name: "Contact", path: "/contact", current: location.pathname === "/contact" },
+  ];
+
+  return (
+    <header className="sticky top-0 z-50 w-full bg-white shadow-lg backdrop-blur-sm bg-white/95">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link 
+            to="/" 
+            className="flex items-center space-x-2 text-xl font-bold text-gray-900 hover:text-emerald-600 transition-colors"
+          >
+            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">FH</span>
+            </div>
+            <span>FashionHub</span>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-8">
+            {navigation.map((item) => (
               <Link
-                to="/"
-                className="hover:text-[#36d7b7]"
-                onClick={() => setIsMenuOpen(false)}
+                key={item.name}
+                to={item.path}
+                className={`font-medium transition-colors duration-200 ${
+                  item.current
+                    ? "text-emerald-600 border-b-2 border-emerald-600"
+                    : "text-gray-700 hover:text-emerald-600"
+                }`}
               >
-                Home
+                {item.name}
               </Link>
-            </li>
-            <li className="font-semibold">
-              <Link
-                to="/shop"
-                className="hover:text-[#36d7b7]"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Shop
-              </Link>
-            </li>
-            <li className="font-semibold">
-              <Link
-                to="/about"
-                className="hover:text-[#36d7b7]"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About
-              </Link>
-            </li>
-            <li className="font-semibold">
-              <Link
-                to="/contact"
-                className="hover:text-[#36d7b7]"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contact
-              </Link>
-            </li>
-            {!user && !seller && (
-              <li>
+            ))}
+          </nav>
+
+          {/* Right Section */}
+          <div className="flex items-center space-x-4">
+            {/* Search */}
+            <div className="relative" ref={searchRef}>
+              {isSearchOpen ? (
+                <form 
+                  onSubmit={handleSearch}
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-lg rounded-lg p-2 min-w-64"
+                >
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search products..."
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSearchOpen(false);
+                        setSearchQuery("");
+                      }}
+                      className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                    >
+                      <IoMdClose size={18} />
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <button
+                  onClick={() => setIsSearchOpen(true)}
+                  className="p-2 text-gray-600 hover:text-emerald-600 transition-colors rounded-lg hover:bg-gray-100"
+                  aria-label="Search"
+                >
+                  <FaSearch size={18} />
+                </button>
+              )}
+            </div>
+
+            {/* Cart */}
+            <Link
+              to="/cart"
+              className="relative p-2 text-gray-600 hover:text-emerald-600 transition-colors rounded-lg hover:bg-gray-100"
+              aria-label="Shopping Cart"
+            >
+              <FaShoppingCart size={20} />
+              {totalQuantity > 0 && (
+                <span className="absolute -top-1 -right-1 text-xs text-white bg-emerald-600 rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-sm">
+                  {totalQuantity}
+                </span>
+              )}
+            </Link>
+
+            {/* User/Seller Profile */}
+            {seller ? (
+              <div className="hidden sm:flex items-center space-x-3">
+                <Link
+                  to="/seller"
+                  className="flex items-center space-x-2 p-2 text-gray-700 hover:text-emerald-600 transition-colors rounded-lg hover:bg-gray-100"
+                >
+                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                    {sellerInitial}
+                  </div>
+                  <span className="hidden md:block text-sm font-medium">Seller Dashboard</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 text-gray-500 hover:text-red-600 transition-colors rounded-lg hover:bg-gray-100"
+                  aria-label="Logout"
+                >
+                  <IoMdLogOut size={18} />
+                </button>
+              </div>
+            ) : user ? (
+              <div className="hidden sm:flex items-center space-x-3">
+                <Link
+                  to="/profile"
+                  className="flex items-center space-x-2 p-2 text-gray-700 hover:text-emerald-600 transition-colors rounded-lg hover:bg-gray-100"
+                >
+                  <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                    {userInitial}
+                  </div>
+                  <span className="hidden md:block text-sm font-medium">My Account</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 text-gray-500 hover:text-red-600 transition-colors rounded-lg hover:bg-gray-100"
+                  aria-label="Logout"
+                >
+                  <IoMdLogOut size={18} />
+                </button>
+              </div>
+            ) : (
+              <div className="hidden sm:flex items-center space-x-3">
                 <Link
                   to="/selectpath"
-                  className="px-4 py-2 bg-[#36d7b7] text-white rounded-md text-xs"
-                  onClick={() => setIsMenuOpen(false)}
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors shadow-sm"
                 >
                   Get Started
                 </Link>
-              </li>
+              </div>
             )}
-            {(user || seller) && (
-              <li>
-                <button
-                  onClick={() => {
-                    handleLogoutUser();
-                    setIsMenuOpen(false);
-                  }}
-                  className="px-4 py-2 bg-[#36d7b7] text-white rounded-md text-xs"
-                >
-                  Logout
-                </button>
-              </li>
-            )}
-          </ul>
+
+            {/* Mobile Menu Button */}
+            <button
+              ref={menuRef}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="lg:hidden p-2 text-gray-600 hover:text-emerald-600 transition-colors rounded-lg hover:bg-gray-100"
+              aria-label="Toggle menu"
+              aria-expanded={isMenuOpen}
+            >
+              <HiMenuAlt3 size={24} />
+            </button>
+          </div>
         </div>
-      )}
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="lg:hidden absolute top-16 left-0 w-full bg-white shadow-xl border-t border-gray-200">
+            <div className="container mx-auto px-4 py-4">
+              {/* Mobile Navigation */}
+              <nav className="mb-6">
+                <ul className="space-y-2">
+                  {navigation.map((item) => (
+                    <li key={item.name}>
+                      <Link
+                        to={item.path}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`block px-4 py-3 rounded-lg font-medium transition-colors ${
+                          item.current
+                            ? "bg-emerald-50 text-emerald-600"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-emerald-600"
+                        }`}
+                      >
+                        {item.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+
+              {/* Mobile Auth Section */}
+              <div className="border-t border-gray-200 pt-4">
+                {seller ? (
+                  <div className="space-y-3">
+                    <Link
+                      to="/seller"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                    >
+                      <FaStore className="text-purple-600" size={18} />
+                      <span>Seller Dashboard</span>
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <IoMdLogOut size={18} />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                ) : user ? (
+                  <div className="space-y-3">
+                    <Link
+                      to="/profile"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                    >
+                      <FaUser className="text-emerald-600" size={18} />
+                      <span>My Account</span>
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <IoMdLogOut size={18} />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    to="/selectpath"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block w-full text-center px-4 py-3 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+                  >
+                    Get Started
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </header>
   );
 };
