@@ -16,8 +16,8 @@ export const createUser = async (userData) => {
     const response = await api.post("/signup", userData);
     return response.data;
   } catch (error) {
-    console.error("Error creating user:", error.message);
-    throw error;
+   console.error(error.message);
+    throw error; 
   }
 };
 
@@ -27,6 +27,7 @@ export const LoginUser = async (userData) => {
     return response.data;
   } catch (error) {
     console.error(error.message);
+    throw error;
   }
 };
 
@@ -35,8 +36,8 @@ export const createrSeller = async (sellerData) => {
     const response = await api.post("/seller-signup", sellerData);
     return response.data;
   } catch (error) {
-    console.error("Error creating user:", error.message);
-    throw error;
+  console.error(error.message);
+    throw error; 
   }
 };
 
@@ -46,6 +47,7 @@ export const sellerLogin = async (sellerData) => {
     return response.data;
   } catch (error) {
     console.error(error.message);
+    throw error; 
   }
 };
 

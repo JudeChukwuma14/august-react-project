@@ -35,7 +35,9 @@ const Signin = () => {
       toast.success(response.message || "Login successfully");
       navigate("/");
     } catch (error) {
-      toast.error(error.message);
+      const errorMessage =
+        error.response?.data?.message || error.message || "Login failed";
+      toast.error(errorMessage);
       console.error("Login error:", error);
     } finally {
       setIsLoading(false);

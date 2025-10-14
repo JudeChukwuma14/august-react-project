@@ -22,20 +22,19 @@ const LoginSeller = () => {
     setIsLoading(true);
     try {
       const response = await sellerLogin(data);
-
-    
-        localStorage.setItem("authToken", response.token);
-        dispatch(
-          setSellerLogin({
-            seller: response.data,
-            token: response.token,
-          })
-        );
-   
+      localStorage.setItem("authToken", response.token);
+      dispatch(
+        setSellerLogin({
+          seller: response.data,
+          token: response.token,
+        })
+      );
       toast.success(response.message || "Login successfully");
       navigate("/seller");
     } catch (error) {
-      toast.error(error.message);
+      const errorMessage =
+        error.response?.data?.message || error.message || "Login failed";
+      toast.error(errorMessage);
       console.error("Login error:", error);
     } finally {
       setIsLoading(false);
