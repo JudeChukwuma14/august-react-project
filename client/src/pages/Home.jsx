@@ -26,6 +26,7 @@ import {
   getShopByCategory,
   getStyleInspiration,
 } from "../service/userApi";
+import { useSelector } from "react-redux";
 
 const Home = () => {
   const [trendingProducts, setTrendingProducts] = useState([]);
@@ -40,7 +41,8 @@ const Home = () => {
     categories: true,
     inspiration: true,
   });
-
+const seller = useSelector((state) => state.seller?.seller || null);
+const dashboardLink = seller?.seller?._id ? "/seller" : "/seller-login"
   const features = [
     {
       icon: Sparkles,
@@ -213,7 +215,7 @@ const Home = () => {
 
             {/* Start Selling Button */}
             <Link
-              to="/shop"
+              to={dashboardLink}
               className="group relative bg-secondary/10 text-secondary-foreground border-2 border-secondary/20 hover:border-secondary/40 hover:bg-secondary/20 h-12 sm:h-14 px-8 sm:px-10 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center gap-3 overflow-hidden"
             >
               {/* Subtle background animation */}

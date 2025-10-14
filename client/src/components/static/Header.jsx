@@ -121,7 +121,7 @@ const Header = () => {
           ) : user ? (
             <>
               <Link 
-                to="/profile" 
+                to="/" 
                 className="p-1 transition-all duration-200 rounded-full hover:bg-gray-100 active:scale-95"
               >
                 <div className="font-bold text-lg bg-[#36d7b7] text-white rounded-full h-8 w-8 flex justify-center items-center ring-2 ring-[#36d7b7]/20 hover:ring-[#36d7b7]/40 transition-all">
