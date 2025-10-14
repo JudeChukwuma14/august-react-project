@@ -1,5 +1,6 @@
 import { BellIcon, MenuIcon, UserCircleIcon, X } from "lucide-react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 export const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
   const seller = useSelector((state) => state.seller?.seller);
@@ -46,7 +47,7 @@ export const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
             Dashboard
           </h1>
           <h1 className="text-xl font-semibold text-gray-800 md:hidden">
-            FashionHub
+            <Link to="/">FashionHub</Link>
           </h1>
         </div>
         <div className="flex items-center ml-4 md:ml-6">
