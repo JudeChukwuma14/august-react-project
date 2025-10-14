@@ -46,12 +46,17 @@ const Header = () => {
     <header className="flex items-center justify-between w-full h-20 px-5 shadow-lg md:px-14 bg-white sticky top-0 z-50">
       {/* Logo */}
       <div className="md:text-xl text-[20px] font-semibold">
-        <Link 
-          to="/" 
-          className="text-gray-800 hover:text-[#36d7b7] transition-colors duration-200 active:scale-95"
-        >
-          FashionHub
-        </Link>
+       <Link 
+            to="/" 
+            className="flex items-center space-x-3 group"
+          >
+            <div className="w-10 h-10 bg-gradient-to-br from-[#36d7b7] to-[#2ebfa1] rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
+              <span className="text-white font-bold text-lg">FH</span>
+            </div>
+            <span className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-gray-800 to-[#36d7b7] bg-clip-text text-transparent">
+              FashionHub
+            </span>
+          </Link>
       </div>
 
       {/* Desktop Navigation */}
@@ -78,13 +83,6 @@ const Header = () => {
       <div className="flex items-center gap-4">
         {/* Search & Cart */}
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate("/search")}
-            className="p-2 text-gray-600 hover:text-[#36d7b7] transition-all duration-200 rounded-full hover:bg-gray-100 active:scale-95"
-            aria-label="Search"
-          >
-            <FaSearch size={20} />
-          </button>
           
           <Link
             to="/cart"
@@ -101,7 +99,7 @@ const Header = () => {
         </div>
 
         {/* User/Seller Profile */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           {seller ? (
             <>
               <Link 
@@ -114,7 +112,7 @@ const Header = () => {
               </Link>
               <button 
                 onClick={handleLogout}
-                className="p-2 text-gray-600 hover:text-red-500 transition-all duration-200 rounded-full hover:bg-gray-100 active:scale-95"
+                className="p-2 text-gray-600 hover:text-red-500 transition-all duration-200 rounded-full hover:bg-gray-100 active:scale-95 hidden md:block"
                 aria-label="Logout"
               >
                 <IoMdLogOut size={20} />
@@ -132,7 +130,7 @@ const Header = () => {
               </Link>
               <button 
                 onClick={handleLogout}
-                className="p-2 text-gray-600 hover:text-red-500 transition-all duration-200 rounded-full hover:bg-gray-100 active:scale-95"
+                className="p-2 text-gray-600 hover:text-red-500 transition-all duration-200 rounded-full hover:bg-gray-100 active:scale-95 hidden md:block"
                 aria-label="Logout"
               >
                 <IoMdLogOut size={20} />

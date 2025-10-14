@@ -196,18 +196,34 @@ const Home = () => {
           <p className="text-xl md:text-2xl mb-8 font-light">
             Discover unique fashion pieces and connect with sellers worldwide
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link to="/shop">
-            <button className="bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 rounded-md text-lg font-medium transition-colors flex items-center justify-center gap-2">
-              Shop Now
-              <ArrowRight className="h-5 w-5" />
-            </button>
-          </Link>
-           <Link to="/shop">
-            <button className="bg-secondary text-secondary-foreground hover:bg-secondary/80 h-11 px-8 rounded-md text-lg font-medium transition-colors">
-              Start Selling
-            </button>
-           </Link>
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-stretch sm:items-center">
+            {/* Shop Now Button */}
+            <Link
+              to="/shop"
+              className="group relative bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground h-12 sm:h-14 px-8 sm:px-10 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center gap-3 overflow-hidden"
+            >
+              {/* Animated background effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+
+              <span className="text-base sm:text-lg font-semibold relative z-10">
+                Shop Now
+              </span>
+              <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-300 group-hover:translate-x-1 relative z-10" />
+            </Link>
+
+            {/* Start Selling Button */}
+            <Link
+              to="/shop"
+              className="group relative bg-secondary/10 text-secondary-foreground border-2 border-secondary/20 hover:border-secondary/40 hover:bg-secondary/20 h-12 sm:h-14 px-8 sm:px-10 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center gap-3 overflow-hidden"
+            >
+              {/* Subtle background animation */}
+              <div className="absolute inset-0 bg-gradient-to-r from-secondary/5 via-transparent to-secondary/5 bg-white group-hover:opacity-100 transition-opacity duration-500" />
+
+              <span className="text-base sm:text-lg font-semibold relative z-10">
+                Start Selling
+              </span>
+                <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-300 group-hover:translate-x-1 relative z-10" />
+            </Link>
           </div>
         </div>
       </section>
